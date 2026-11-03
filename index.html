@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Bilancio</title>
+<title>MoneyDay</title>
 <meta name="description" content="Spese, conti, spese fisse e previsioni, tutto sul tuo telefono.">
 <meta name="theme-color" content="#F2F2F7">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Bilancio">
+<meta name="apple-mobile-web-app-title" content="MoneyDay">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -769,7 +769,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount(){clearTimeout(this._tt);window.removeEventListener('resize',this._rs);document.removeEventListener('visibilitychange',this._vis)}
   syncChrome(){const dark=(this.state.themeO||this.props.theme||'Chiaro')==='Scuro';const c=dark?'#000000':'#F2F2F7';if(this._chrome===c)return;this._chrome=c;document.documentElement.style.background=c;document.body.style.background=c;document.documentElement.style.colorScheme=dark?'dark':'light';const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',c)}
-  exportBackup(){const s=this.state;const data=JSON.stringify({app:'bilancio',v:1,saved:new Date().toISOString(),cfg:s.cfg,tx:s.tx,rec:s.rec,ov:s.ov},null,1);const name='bilancio-backup-'+this.TODAY+'.json';const file=new File([data],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Backup Bilancio'}).catch(()=>{});return}const u=URL.createObjectURL(file);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);this.toast('Backup scaricato')}
+  exportBackup(){const s=this.state;const data=JSON.stringify({app:'bilancio',v:1,saved:new Date().toISOString(),cfg:s.cfg,tx:s.tx,rec:s.rec,ov:s.ov},null,1);const name='moneyday-backup-'+this.TODAY+'.json';const file=new File([data],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Backup MoneyDay'}).catch(()=>{});return}const u=URL.createObjectURL(file);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);this.toast('Backup scaricato')}
   importBackup(){const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{let d=null;try{d=JSON.parse(r.result)}catch(e){}if(!d||!d.cfg||!Array.isArray(d.cfg.accounts)||!Array.isArray(d.tx))return this.toast('Questo file non è un backup valido');this.setState({cfg:d.cfg,tx:d.tx||[],rec:d.rec||[],ov:d.ov||{},view:'mese',ym:this.CUR,sheet:null,openEdit:{},armed:null});this.toast('Dati ripristinati')};r.readAsText(f)};inp.click()}
 
   pad(n){return String(n).padStart(2,'0')}

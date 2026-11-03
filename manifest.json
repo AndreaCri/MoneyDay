@@ -1,6 +1,6 @@
 {
-  "name": "Bilancio",
-  "short_name": "Bilancio",
+  "name": "MoneyDay",
+  "short_name": "MoneyDay",
   "description": "Spese, conti, spese fisse e previsioni, tutto sul tuo telefono.",
   "lang": "it",
   "start_url": "./",
