@@ -1,6 +1,6 @@
 // Service worker di Bilancio: rende l'app disponibile offline.
 // Quando pubblichi una nuova versione, cambia il numero qui sotto.
-const VERSION = 'bilancio-v4';
+const VERSION = 'bilancio-v5';
 
 const APP_FILES = [
   './',
