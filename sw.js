@@ -1,15 +1,15 @@
 // Service worker di Bilancio: rende l'app disponibile offline.
 // Quando pubblichi una nuova versione, cambia il numero qui sotto.
-const VERSION = 'bilancio-v1';
+const VERSION = 'bilancio-v2';
 
 const APP_FILES = [
   './',
   'index.html',
   'react.js',
   'manifest.json',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
-  'icons/apple-touch-icon.png'
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {
