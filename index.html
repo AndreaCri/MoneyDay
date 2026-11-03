@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Bilancio</title>
+<meta name="description" content="Spese, conti, spese fisse e previsioni, tutto sul tuo telefono.">
+<meta name="theme-color" content="#F2F2F7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bilancio">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#E3E3E8;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",sans-serif}
+a{color:#007AFF}a:hover{color:#0062CC}
+button,input,select{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+[data-theme]{--bg:#F2F2F7;--card:#FFFFFF;--fill:rgba(118,118,128,.12);--fill2:rgba(118,118,128,.08);--sep:rgba(60,60,67,.13);--label:#0B0B0F;--label2:rgba(60,60,67,.66);--label3:rgba(60,60,67,.45);--blue:#007AFF;--inc:#1E9E47;--incf:#34C759;--exp:#E5372C;--expf:#FF3B30;--hero:linear-gradient(140deg,#4F46E5 0%,#2563EB 45%,#0EA5E9 100%);--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(15,23,42,.06);--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",sans-serif;--fontd:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;--fontr:ui-rounded,"SF Pro Rounded",-apple-system,"Inter",sans-serif}
+[data-theme="dark"]{--bg:#000;--card:#1C1C1E;--fill:rgba(118,118,128,.24);--fill2:rgba(118,118,128,.14);--sep:rgba(84,84,88,.55);--label:#fff;--label2:rgba(235,235,245,.66);--label3:rgba(235,235,245,.4);--blue:#0A84FF;--inc:#30D158;--incf:#30D158;--exp:#FF453A;--expf:#FF453A;--hero:linear-gradient(140deg,#3730A3 0%,#1D4ED8 50%,#0284C7 100%);--shadow:none;color-scheme:dark}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.2);opacity:0}}
+@keyframes sheetUp{from{transform:translateY(60px);opacity:.4}}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+@keyframes blink{50%{opacity:0}}
+html,body{margin:0;height:100%;background:#F2F2F7;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",sans-serif;touch-action:manipulation}
+#root{height:100%}
+*::-webkit-scrollbar{display:none}
+input,select{outline:none}
+.key:active{background:var(--fill)!important}
+.boot{position:fixed;inset:0;display:grid;place-items:center;color:rgba(60,60,67,.6);font-size:15px;text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<div id="root"><div class="boot">Caricamento…</div></div>
+
+<template id="app-template">
+<div data-theme="{{ theme }}" style="position:fixed;top:0;bottom:0;left:0;right:0;margin:0 auto;max-width:520px;z-index:1;background:var(--bg);color:var(--label);font-family:var(--font);font-size:16px;line-height:1.4;letter-spacing:-.011em;-webkit-font-smoothing:antialiased;overflow:hidden">
+
+<template sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 40px)">
+  <section style="position:relative;border-radius:26px;padding:22px 20px 24px;color:#fff;background:var(--hero);overflow:hidden;box-shadow:0 12px 40px -12px rgba(37,99,235,.55)">
+    <div style="position:absolute;right:-60px;top:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 60%)"></div>
+    <div style="font-size:14px;font-weight:600;opacity:.85;position:relative">Benvenuto</div>
+    <div style="font-family:var(--fontr);font-weight:700;font-size:34px;letter-spacing:-.035em;line-height:1.08;margin-top:6px;position:relative">Imposta i tuoi conti</div>
+    <p style="position:relative;margin:10px 0 0;opacity:.92;font-size:15px;text-wrap:pretty">Scegli il mese di partenza e scrivi quanto c'è su ogni conto. Da lì in poi i saldi si aggiornano da soli e a gennaio ripartono dal saldo finale dell'anno.</p>
+  </section>
+  <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Saldi di partenza</h2>
+  <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+    <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;min-height:50px">
+      <span style="width:30px;height:30px;border-radius:9px;background:#FF9500;color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 6.5h16V20H4zM4 10.5h16M8.5 4v4M15.5 4v4"></path></svg></span>
+      <span style="flex:1;font-weight:500">Primo mese</span>
+      <input type="month" value="{{ su.ym }}" onChange="{{ su.onYM }}" style="border:0;background:none;color:var(--blue);font-weight:600;text-align:right;font-size:16px">
+    </div>
+    <template sc-for list="{{ su.accs }}" as="a" hint-placeholder-count="6">
+      <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;position:relative">
+        <div style="position:absolute;left:54px;right:0;top:0;border-top:.5px solid var(--sep)"></div>
+        <span style="width:30px;height:30px;border-radius:9px;background:{{ a.grad }};color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 6h18v12H3zM3 10h18M7 14.5h4"></path></svg></span>
+        <span style="flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</span>
+        <input value="{{ a.val }}" onChange="{{ a.onChange }}" inputmode="decimal" placeholder="0,00" style="flex:0 0 112px;width:112px;text-align:right;font-family:var(--fontr);font-weight:600;background:var(--fill2);border:0;border-radius:9px;padding:7px 10px;font-size:16px;color:var(--label)">
+      </div>
+    </template>
+  </div>
+  <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">Per la carta di credito scrivi un numero negativo se hai un debito. Conti e categorie si possono cambiare in Impostazioni.</p>
+  <button onClick="{{ su.go }}" style="width:100%;margin-top:20px;border:0;background:var(--blue);color:#fff;border-radius:14px;padding:15px;font-weight:600;font-size:17px">Inizia</button>
+</div>
+</template>
+
+<template sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none">
+  <header style="position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 12px) 16px 8px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onClick="{{ hd.onTitle }}" style="display:flex;align-items:baseline;gap:8px;min-width:0;margin-right:auto;border:0;background:none;padding:0;text-align:left">
+        <b style="font-family:var(--fontd);font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1">{{ hd.title }}</b>
+        <span style="font-size:17px;color:var(--label3);font-weight:600">{{ hd.sub }}</span>
+      </button>
+      <template sc-if value="{{ hd.nav }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ hd.onPrev }}" aria-label="Mese precedente" style="width:36px;height:36px;border-radius:50%;border:0;background:var(--fill);display:grid;place-items:center;color:var(--blue);flex:none"><svg viewBox="0 0 24 24" width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+        <button onClick="{{ hd.onNext }}" aria-label="Mese successivo" style="width:36px;height:36px;border-radius:50%;border:0;background:var(--fill);display:grid;place-items:center;color:var(--blue);flex:none"><svg viewBox="0 0 24 24" width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M9 5l7 7-7 7"></path></svg></button>
+      </template>
+    </div>
+  </header>
+  <div style="padding:4px 16px calc(env(safe-area-inset-bottom) + 130px)">
+
+  <template sc-if value="{{ before }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:18px;background:var(--card);border-radius:20px;padding:30px 20px;text-align:center;color:var(--label2);box-shadow:var(--shadow)">
+      <div style="font-weight:600;color:var(--label)">{{ beforeText }}</div>
+      <div style="margin-top:4px">Prima di quel mese non ci sono dati.</div>
+      <button onClick="{{ onStart }}" style="margin-top:14px;border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:8px 14px;font-weight:600;font-size:14px">{{ startLabel }}</button>
+    </div>
+  </template>
+
+  <template sc-if value="{{ vMese }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:rise .35s ease-out">
+    <section style="position:relative;border-radius:26px;padding:20px 20px 14px;color:#fff;background:var(--hero);overflow:hidden;margin-top:6px;box-shadow:0 12px 40px -12px rgba(37,99,235,.55)">
+      <div style="position:absolute;right:-60px;top:-90px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 60%);pointer-events:none"></div>
+      <div style="display:flex;align-items:center;gap:10px;position:relative">
+        <span style="font-size:14px;font-weight:600;opacity:.85;margin-right:auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.label }}</span>
+        <select value="{{ m.acc }}" onChange="{{ m.onAcc }}" aria-label="Conto" style="appearance:none;-webkit-appearance:none;border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:16px;padding:6px 12px;font-size:13.5px;font-weight:600;max-width:52%">
+          <template sc-for list="{{ accOpts }}" as="o"><option value="{{ o.v }}" style="color:#000">{{ o.l }}</option></template>
+        </select>
+      </div>
+      <div style="font-family:var(--fontr);font-weight:700;font-size:44px;letter-spacing:-.035em;line-height:1.08;margin-top:6px;position:relative;white-space:nowrap;font-variant-numeric:tabular-nums">{{ m.value }}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;position:relative">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:14px;padding:4px 10px;font-size:13px;font-weight:600;white-space:nowrap">{{ m.diff }}</span>
+        <template sc-if value="{{ m.hasEom }}"><span style="display:inline-flex;align-items:center;background:rgba(255,255,255,.2);border-radius:14px;padding:4px 10px;font-size:13px;font-weight:600;white-space:nowrap">{{ m.eom }}</span></template>
+      </div>
+      <div onPointerMove="{{ m.onScrub }}" onPointerDown="{{ m.onScrub }}" onPointerLeave="{{ offScrub }}" style="margin:12px -20px 0;position:relative;touch-action:pan-y;height:150px">
+        <svg width="{{ W1 }}" height="150" viewBox="0 0 {{ W1 }} 150" style="display:block;overflow:visible">
+          <defs><linearGradient id="hgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:#fff;stop-opacity:.35"></stop><stop offset="1" style="stop-color:#fff;stop-opacity:0"></stop></linearGradient></defs>
+          <path d="{{ m.hc.area }}" fill="url(#hgA)"></path>
+          <path d="{{ m.hc.fcArea }}" fill="url(#hgA)" opacity=".45"></path>
+          <path d="{{ m.hc.line }}" style="fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"></path>
+          <path d="{{ m.hc.fcLine }}" style="fill:none;stroke:rgba(255,255,255,.75);stroke-width:2.6;stroke-dasharray:1 6;stroke-linecap:round"></path>
+          <circle cx="{{ m.hc.dx }}" cy="{{ m.hc.dy }}" r="5" opacity="{{ m.hc.dotOp }}" style="fill:#fff;animation:pulse 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center"></circle>
+          <circle cx="{{ m.hc.dx }}" cy="{{ m.hc.dy }}" r="5" opacity="{{ m.hc.dotOp }}" style="fill:#fff;stroke:rgba(255,255,255,.5);stroke-width:2.5"></circle>
+          <line x1="{{ m.hc.cx }}" x2="{{ m.hc.cx }}" y1="0" y2="150" opacity="{{ m.hc.curOp }}" style="stroke:rgba(255,255,255,.6);stroke-width:1;stroke-dasharray:3 3"></line>
+          <circle cx="{{ m.hc.cx }}" cy="{{ m.hc.cy }}" r="6" opacity="{{ m.hc.curOp }}" style="fill:#fff;stroke:#fff;stroke-width:3"></circle>
+        </svg>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:500;padding-top:4px;opacity:.8;position:relative">
+        <template sc-for list="{{ m.xl }}" as="x" hint-placeholder-count="3"><span>{{ x }}</span></template>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:10px;position:relative">
+        <template sc-for list="{{ m.ranges }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.onClick }}" style="flex:1;border:0;background:{{ r.bg }};color:#fff;opacity:{{ r.op }};padding:7px 0;border-radius:12px;font-weight:600;font-size:13.5px">{{ r.l }}</button></template>
+      </div>
+    </section>
+
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px">
+      <template sc-for list="{{ m.tiles }}" as="t" hint-placeholder-count="3">
+        <div style="background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 12px 13px;min-width:0">
+          <span style="width:34px;height:34px;border-radius:10px;background:{{ t.c }};color:#fff;display:grid;place-items:center;margin-bottom:10px"><svg viewBox="0 0 24 24" width="19" height="19" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ t.ic }}"></path></svg></span>
+          <div style="font-size:13px;color:var(--label2);font-weight:600">{{ t.k }}</div>
+          <div style="font-family:var(--fontr);font-weight:700;font-size:18px;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;color:{{ t.vc }}">{{ t.v }}</div>
+          <div style="font-size:12px;color:var(--label3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.s }}</div>
+        </div>
+      </template>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:28px 4px 12px">
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:0 auto 0 0">Conti</h2>
+      <button onClick="{{ m.toConti }}" style="border:0;background:none;color:var(--blue);font-weight:600;font-size:15px;padding:4px 2px">Dettagli</button>
+    </div>
+    <div style="display:grid;grid-auto-flow:column;grid-auto-columns:46%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;margin:0 -16px;padding-left:18px;padding-right:18px;scroll-padding-left:18px;scrollbar-width:none">
+      <template sc-for list="{{ m.minis }}" as="a" hint-placeholder-count="3">
+        <button onClick="{{ a.onClick }}" style="scroll-snap-align:start;border-radius:18px;padding:14px;color:#fff;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;position:relative;overflow:hidden;border:0;text-align:left;background:{{ a.grad }};box-shadow:{{ a.ring }}">
+          <span style="position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.14)"></span>
+          <span style="font-size:13.5px;font-weight:600;opacity:.92;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ a.name }}</span>
+          <span style="font-family:var(--fontr);font-weight:700;font-size:20px;letter-spacing:-.02em;position:relative;white-space:nowrap;font-variant-numeric:tabular-nums">{{ a.bal }}</span>
+        </button>
+      </template>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:22px 4px 4px">
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:0 auto 0 0">Movimenti</h2>
+      <div style="position:relative;max-width:56%;display:flex">
+        <select value="{{ m.catF }}" onChange="{{ m.onCat }}" aria-label="Filtra per categoria" style="appearance:none;-webkit-appearance:none;border:0;background:var(--fill);color:var(--blue);font-weight:600;font-size:14px;border-radius:16px;padding:7px 30px 7px 13px;width:100%;text-overflow:ellipsis">
+          <template sc-for list="{{ m.catOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></template>
+        </select>
+        <svg viewBox="0 0 10 6" width="10" height="6" style="position:absolute;right:12px;top:50%;margin-top:-3px;pointer-events:none;fill:none;stroke:var(--blue);stroke-width:1.6;stroke-linecap:round"><path d="M1 1l4 4 4-4"></path></svg>
+      </div>
+    </div>
+    <template sc-if value="{{ m.hasRows }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12px;color:var(--label3);margin:0 6px 0">Scorri una riga verso sinistra per modificarla o eliminarla.</div>
+    </template>
+    <template sc-for list="{{ m.days }}" as="day" hint-placeholder-count="0">
+      <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--label2);font-weight:600;padding:18px 8px 7px"><span>{{ day.label }}</span><span style="font-variant-numeric:tabular-nums;color:{{ day.netC }}">{{ day.net }}</span></div>
+      <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+        <template sc-for list="{{ day.rows }}" as="r">
+          <div style="position:relative;overflow:hidden">
+            <div style="position:absolute;top:0;bottom:0;right:0;width:148px;display:flex">
+              <template sc-for list="{{ r.actions }}" as="a"><button onClick="{{ a.onClick }}" style="flex:1;border:0;background:{{ a.bg }};color:#fff;font-size:12.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><svg viewBox="0 0 24 24" width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ a.ic }}"></path></svg>{{ a.l }}</button></template>
+            </div>
+            <div onPointerDown="{{ r.pd }}" onPointerMove="{{ r.pm }}" onPointerUp="{{ r.pu }}" onPointerCancel="{{ r.pu }}" style="position:relative;display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card);transform:{{ r.tx }};transition:{{ r.tr }};touch-action:pan-y;cursor:pointer;user-select:none">
+              <template sc-if value="{{ r.sep }}"><div style="position:absolute;left:60px;right:0;top:0;border-top:.5px solid var(--sep)"></div></template>
+              <span style="width:34px;height:34px;border-radius:10px;background:{{ r.c }};color:#fff;display:grid;place-items:center;flex:none;opacity:{{ r.op }}"><svg viewBox="0 0 24 24" width="19" height="19" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ r.ic }}"></path></svg></span>
+              <div style="flex:1;min-width:0;opacity:{{ r.op }}">
+                <div style="font-weight:600;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.t }}<template sc-for list="{{ r.badges }}" as="b"><span style="display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:2px;text-transform:uppercase;background:{{ b.bg }};color:{{ b.fg }}">{{ b.t }}</span></template></div>
+                <div style="font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.meta }}</div>
+              </div>
+              <div style="font-family:var(--fontr);font-weight:600;font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;color:{{ r.ac }};text-decoration:{{ r.deco }};opacity:{{ r.op }}">{{ r.amt }}<template sc-if value="{{ r.changed }}"><small style="display:block;font-family:var(--font);font-size:11.5px;font-weight:500;color:var(--label3)">modificata</small></template></div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+    <template sc-if value="{{ m.empty }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:12px;background:var(--card);border-radius:20px;padding:30px 20px;text-align:center;color:var(--label2);box-shadow:var(--shadow)">
+        <span style="width:46px;height:46px;border-radius:14px;background:var(--blue);color:#fff;display:grid;place-items:center;margin:0 auto 12px"><svg viewBox="0 0 24 24" width="24" height="24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M12 5v14M5 12h14"></path></svg></span>
+        <b style="color:var(--label)">{{ m.emptyT }}</b><br><span>Tocca il pulsante + per aggiungere una spesa o un'entrata.</span>
+      </div>
+    </template>
+  </div>
+  </template>
+
+  <template sc-if value="{{ vAn }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:rise .35s ease-out">
+    <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-top:8px">
+      <template sc-for list="{{ an.tabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};box-shadow:{{ t.sh }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.l }}</button></template>
+    </div>
+
+    <template sc-if value="{{ an.isMese }}">
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Dove spendi</h2>
+      <template sc-if value="{{ an.hasOut }}">
+        <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px">
+          <div style="position:relative;width:200px;height:200px;margin:0 auto 8px">
+            <div style="position:absolute;inset:9px;border-radius:50%;background:{{ an.conic }};-webkit-mask:radial-gradient(circle,transparent 69px,#000 70px);mask:radial-gradient(circle,transparent 69px,#000 70px)"></div>
+            <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center">
+              <span style="font-size:12.5px;color:var(--label2);font-weight:500">Uscite</span>
+              <b style="font-family:var(--fontr);font-size:24px;font-weight:700;letter-spacing:-.03em;color:var(--exp)">{{ an.outT }}</b>
+              <span style="font-size:12.5px;color:var(--label2);font-weight:500">{{ an.ymS }}</span>
+            </div>
+          </div>
+          <template sc-for list="{{ an.cats }}" as="c">
+            <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:10px 0;border-top:{{ c.bt }}">
+              <span style="grid-row:1/3;width:30px;height:30px;border-radius:9px;background:{{ c.c }};color:#fff;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ c.ic }}"></path></svg></span>
+              <span style="font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.n }}</span>
+              <span style="text-align:right;white-space:nowrap;font-family:var(--fontr);font-weight:600;font-variant-numeric:tabular-nums">{{ c.v }}<small style="display:block;font-family:var(--font);font-size:12px;font-weight:600;color:{{ c.dc }}">{{ c.d }}</small></span>
+              <div style="grid-column:2/4;height:6px;border-radius:3px;background:var(--fill);position:relative">
+                <i style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:{{ c.c }};width:{{ c.w }}"></i>
+                <u style="position:absolute;top:-4px;bottom:-4px;width:2.5px;border-radius:2px;background:var(--label);opacity:{{ c.aOp }};left:{{ c.aL }}"></u>
+              </div>
+            </div>
+          </template>
+          <template sc-if value="{{ an.hasAvg }}"><div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--label2);margin-top:10px;font-weight:500"><i style="display:inline-block;background:var(--label);opacity:.55;width:3px;height:12px;border-radius:2px"></i>{{ an.avgL }}</div></template>
+        </div>
+      </template>
+      <template sc-if value="{{ an.noOut }}">
+        <div style="background:var(--card);border-radius:20px;padding:30px 20px;text-align:center;color:var(--label2);box-shadow:var(--shadow)"><b style="color:var(--label)">{{ an.noOutT }}</b><br>Le uscite che aggiungi compariranno qui divise per categoria.</div>
+      </template>
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Ritmo di spesa</h2>
+      <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-bottom:12px">
+        <template sc-for list="{{ an.wins }}" as="t"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};box-shadow:{{ t.sh }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px">{{ t.l }}</button></template>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+        <template sc-for list="{{ an.stats }}" as="t">
+          <div style="background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);min-width:0">
+            <span style="width:30px;height:30px;border-radius:9px;background:{{ t.c }};color:#fff;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ t.ic }}"></path></svg></span>
+            <div style="font-size:13px;color:var(--label2);font-weight:600;margin-top:8px">{{ t.k }}</div>
+            <div style="font-family:var(--fontr);font-size:21px;font-weight:700;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;color:{{ t.vc }}">{{ t.v }}</div>
+            <div style="font-size:12px;color:var(--label3)">{{ t.s }}</div>
+          </div>
+        </template>
+      </div>
+      <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">{{ an.hint }}</p>
+    </template>
+
+    <template sc-if value="{{ an.isAnno }}">
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">{{ an.yT }}</h2>
+      <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px">
+          <template sc-for list="{{ an.fg }}" as="f"><div style="background:var(--fill2);border-radius:14px;padding:10px 12px;min-width:0"><div style="font-size:12px;color:var(--label2);font-weight:600">{{ f.k }}</div><div style="font-family:var(--fontr);font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ f.c }}">{{ f.v }}</div></div></template>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;min-height:46px">
+          <span style="font-family:var(--fontr);font-weight:700;font-size:30px;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:{{ an.rdC }}">{{ an.rdBig }}</span>
+          <span style="font-size:13.5px;color:var(--label2);font-weight:500">{{ an.rdLbl }}</span>
+        </div>
+        <div style="position:relative;margin-top:8px;height:170px">
+          <svg width="{{ W2 }}" height="150" viewBox="0 0 {{ W2 }} 150" style="display:block;position:absolute;left:0;top:0">
+            <path d="{{ an.bp.zero }}" style="fill:none;stroke:var(--fill);stroke-width:{{ an.bp.bw }};stroke-linecap:round"></path>
+            <path d="{{ an.bp.inc }}" style="fill:none;stroke:var(--incf);stroke-width:{{ an.bp.bw }};stroke-linecap:round"></path>
+            <path d="{{ an.bp.incF }}" style="fill:none;stroke:var(--incf);opacity:.4;stroke-width:{{ an.bp.bw }};stroke-linecap:round"></path>
+            <path d="{{ an.bp.out }}" style="fill:none;stroke:var(--expf);stroke-width:{{ an.bp.bw }};stroke-linecap:round"></path>
+            <path d="{{ an.bp.outF }}" style="fill:none;stroke:var(--expf);opacity:.4;stroke-width:{{ an.bp.bw }};stroke-linecap:round"></path>
+          </svg>
+          <div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr))">
+            <template sc-for list="{{ an.hits }}" as="h" hint-placeholder-count="12"><button onClick="{{ h.onClick }}" style="border:0;border-radius:10px;background:{{ h.bg }};display:flex;align-items:flex-end;justify-content:center;padding:0 0 4px;font-size:11px;font-weight:{{ h.fw }};color:{{ h.c }}">{{ h.t }}</button></template>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--label2);margin-top:12px;font-weight:500">
+          <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--incf)"></i>Entrate</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:var(--expf)"></i>Uscite</span>
+          <span>Colori tenui = mese in corso o futuro</span>
+        </div>
+      </div>
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Categorie mese per mese</h2>
+      <template sc-if value="{{ an.hasHeat }}">
+        <div style="overflow-x:auto;background:var(--card);border-radius:20px;box-shadow:var(--shadow);scrollbar-width:none">
+          <div style="display:grid;grid-template-columns:150px repeat(12,48px) 60px;width:max-content;font-size:13px;font-variant-numeric:tabular-nums">
+            <div style="padding:9px 10px;position:sticky;left:0;background:var(--card);font-weight:600;color:var(--label3);font-size:12px;border-bottom:.5px solid var(--sep);z-index:1">Categoria</div>
+            <template sc-for list="{{ an.hm }}" as="h"><div style="padding:9px 8px;text-align:right;font-weight:600;font-size:12px;border-bottom:.5px solid var(--sep);color:{{ h.c }}">{{ h.l }}</div></template>
+            <div style="padding:9px 10px;text-align:right;font-weight:600;font-size:12px;color:var(--label3);border-bottom:.5px solid var(--sep)">Totale</div>
+            <template sc-for list="{{ an.heat }}" as="row">
+              <div style="padding:7px 10px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:7px;background:{{ row.c }};color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="14" height="14" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ row.ic }}"></path></svg></span>{{ row.n }}</div>
+              <template sc-for list="{{ row.cells }}" as="v"><div style="padding:9px 8px;text-align:right;border-radius:6px;background:{{ v.bg }}">{{ v.t }}</div></template>
+              <div style="padding:9px 10px;text-align:right">{{ row.tot }}</div>
+            </template>
+            <template sc-for list="{{ an.totRows }}" as="row">
+              <div style="padding:9px 10px;position:sticky;left:0;background:var(--card);font-weight:700;border-top:.5px solid var(--sep);z-index:1">{{ row.n }}</div>
+              <template sc-for list="{{ row.cells }}" as="v"><div style="padding:9px 8px;text-align:right;font-weight:700;border-top:.5px solid var(--sep);color:{{ row.c }}">{{ v }}</div></template>
+              <div style="padding:9px 10px;text-align:right;font-weight:700;border-top:.5px solid var(--sep);color:{{ row.c }}">{{ row.tot }}</div>
+            </template>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">Importi in euro arrotondati. Più il colore è intenso, più hai speso in quella categoria. Scorri la tabella di lato per vedere tutti i mesi.</p>
+      </template>
+      <template sc-if value="{{ an.noHeat }}"><div style="background:var(--card);border-radius:20px;padding:30px 20px;text-align:center;color:var(--label2);box-shadow:var(--shadow)"><b style="color:var(--label)">{{ an.noHeatT }}</b></div></template>
+    </template>
+
+    <template sc-if value="{{ an.isPrev }}">
+      <div style="display:flex;align-items:center;gap:10px;margin:28px 4px 12px">
+        <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:0 auto 0 0">Dove arriverai</h2>
+        <div style="position:relative;max-width:56%;display:flex">
+          <select value="{{ an.fcAcc }}" onChange="{{ an.onFcAcc }}" style="appearance:none;-webkit-appearance:none;border:0;background:var(--fill);color:var(--blue);font-weight:600;font-size:14px;border-radius:16px;padding:7px 30px 7px 13px;width:100%">
+            <template sc-for list="{{ accOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></template>
+          </select>
+          <svg viewBox="0 0 10 6" width="10" height="6" style="position:absolute;right:12px;top:50%;margin-top:-3px;pointer-events:none;fill:none;stroke:var(--blue);stroke-width:1.6;stroke-linecap:round"><path d="M1 1l4 4 4-4"></path></svg>
+        </div>
+      </div>
+      <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px">
+        <div style="display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap;min-height:46px">
+          <span style="font-family:var(--fontr);font-weight:700;font-size:30px;letter-spacing:-.03em;font-variant-numeric:tabular-nums">{{ an.pv }}</span>
+          <span style="font-size:13.5px;color:var(--label2);font-weight:500">{{ an.pl }}</span>
+        </div>
+        <div onPointerMove="{{ an.onScrub }}" onPointerDown="{{ an.onScrub }}" onPointerLeave="{{ offScrub }}" style="margin-top:6px;touch-action:pan-y;height:200px">
+          <svg width="{{ W2 }}" height="200" viewBox="0 0 {{ W2 }} 200" style="display:block;overflow:visible">
+            <defs><linearGradient id="fgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--blue);stop-opacity:.24"></stop><stop offset="1" style="stop-color:var(--blue);stop-opacity:0"></stop></linearGradient></defs>
+            <line x1="0" x2="{{ W2 }}" y1="{{ an.fc.zeroY }}" y2="{{ an.fc.zeroY }}" style="stroke:var(--sep);stroke-dasharray:3 4"></line>
+            <path d="{{ an.fc.area }}" fill="url(#fgA)"></path>
+            <path d="{{ an.fc.fcArea }}" fill="url(#fgA)" opacity=".45"></path>
+            <path d="{{ an.fc.line }}" style="fill:none;stroke:var(--blue);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"></path>
+            <path d="{{ an.fc.fcLine }}" style="fill:none;stroke:var(--blue);opacity:.6;stroke-width:2.6;stroke-dasharray:1 6;stroke-linecap:round"></path>
+            <circle cx="{{ an.fc.dx }}" cy="{{ an.fc.dy }}" r="5" opacity="{{ an.fc.dotOp }}" style="fill:var(--blue);animation:pulse 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center"></circle>
+            <circle cx="{{ an.fc.dx }}" cy="{{ an.fc.dy }}" r="5" opacity="{{ an.fc.dotOp }}" style="fill:var(--blue);stroke:var(--card);stroke-width:2.5"></circle>
+            <line x1="{{ an.fc.cx }}" x2="{{ an.fc.cx }}" y1="0" y2="200" opacity="{{ an.fc.curOp }}" style="stroke:var(--label3);stroke-dasharray:3 3"></line>
+            <circle cx="{{ an.fc.cx }}" cy="{{ an.fc.cy }}" r="6" opacity="{{ an.fc.curOp }}" style="fill:var(--card);stroke:var(--blue);stroke-width:3"></circle>
+          </svg>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:500;padding-top:4px;color:var(--label3)"><template sc-for list="{{ an.xl }}" as="x"><span>{{ x }}</span></template></div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px">
+          <template sc-for list="{{ an.fg }}" as="f"><div style="background:var(--fill2);border-radius:14px;padding:10px 12px;min-width:0"><div style="font-size:12px;color:var(--label2);font-weight:600;white-space:nowrap">{{ f.k }}</div><div style="font-family:var(--fontr);font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.v }}</div><div style="font-size:11.5px;font-weight:600;color:{{ f.c }}">{{ f.s }}</div></div></template>
+        </div>
+        <div style="display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--label2);margin-top:12px;font-weight:500">
+          <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:3px;border-radius:2px;background:var(--blue)"></i>Saldo reale</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:3px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--blue) 0 3px,transparent 3px 7px)"></i>Previsione</span>
+        </div>
+      </div>
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Calcolata su</h2>
+      <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px;margin-bottom:12px">
+        <template sc-for list="{{ an.wins }}" as="t"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};box-shadow:{{ t.sh }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px">{{ t.l }}</button></template>
+      </div>
+      <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+        <template sc-for list="{{ an.calc }}" as="r">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;position:relative">
+            <template sc-if value="{{ r.sep }}"><div style="position:absolute;left:60px;right:0;top:0;border-top:.5px solid var(--sep)"></div></template>
+            <span style="width:34px;height:34px;border-radius:10px;background:{{ r.c }};color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="19" height="19" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ r.ic }}"></path></svg></span>
+            <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:15.5px">{{ r.t }}</div><div style="font-size:13px;color:var(--label2)">{{ r.m }}</div></div>
+            <div style="font-family:var(--fontr);font-weight:600;font-size:16px;white-space:nowrap;color:{{ r.ac }}">{{ r.a }}</div>
+          </div>
+        </template>
+      </div>
+      <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">{{ an.hint }}</p>
+    </template>
+  </div>
+  </template>
+
+  <template sc-if value="{{ vConti }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:rise .35s ease-out">
+    <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px;margin-top:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="min-width:0">
+        <div style="font-size:13px;color:var(--label2);font-weight:500">{{ ct.cap }}</div>
+        <div style="font-family:var(--fontr);font-weight:700;font-size:38px;letter-spacing:-.035em;line-height:1.1;margin-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums">{{ ct.tot }}</div>
+        <div style="font-size:13px;color:var(--label2);font-weight:500;margin-top:4px">{{ ct.start }} · <span style="color:var(--inc)">{{ ct.inc }}</span> · <span style="color:var(--exp)">{{ ct.out }}</span></div>
+      </div>
+      <button onClick="{{ ct.onTr }}" aria-label="Giroconto tra conti" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:8px 10px;flex:none"><svg viewBox="0 0 24 24" width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 8h15l-4-4M20 16H5l4 4"></path></svg></button>
+    </div>
+    <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">I tuoi conti</h2>
+    <div style="display:grid;gap:12px">
+      <template sc-for list="{{ ct.cards }}" as="a" hint-placeholder-count="3">
+        <div style="border-radius:22px;padding:18px;color:#fff;position:relative;overflow:hidden;min-height:150px;display:flex;flex-direction:column;gap:2px;background:{{ a.grad }}">
+          <span style="position:absolute;right:-50px;top:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.12)"></span>
+          <button onClick="{{ a.onAdj }}" style="position:absolute;right:14px;top:14px;border:0;background:rgba(255,255,255,.22);color:#fff;font-weight:600;font-size:12.5px;border-radius:14px;padding:5px 11px">Allinea</button>
+          <div style="font-weight:600;font-size:15px;opacity:.95;position:relative;max-width:62%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</div>
+          <div style="font-family:var(--fontr);font-weight:700;font-size:30px;letter-spacing:-.03em;margin:4px 0 auto;position:relative;white-space:nowrap;font-variant-numeric:tabular-nums">{{ a.bal }}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;position:relative">
+            <template sc-for list="{{ a.pills }}" as="p"><span style="background:rgba(255,255,255,.2);border-radius:14px;padding:4px 10px;font-size:12px;font-weight:600;white-space:nowrap">{{ p }}</span></template>
+          </div>
+        </div>
+      </template>
+    </div>
+    <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">Il saldo di inizio anno è riportato in automatico dalla chiusura dell'anno precedente. Se un saldo non corrisponde a quello della banca tocca <b>Allinea</b>: viene registrata una rettifica con la differenza. Il pulsante con le frecce sposta soldi tra due conti.</p>
+  </div>
+  </template>
+
+  <template sc-if value="{{ vFisse }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:rise .35s ease-out">
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px">
+      <template sc-for list="{{ fx.tiles }}" as="t">
+        <div style="background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 12px 13px;min-width:0">
+          <span style="width:34px;height:34px;border-radius:10px;background:{{ t.c }};color:#fff;display:grid;place-items:center;margin-bottom:10px"><svg viewBox="0 0 24 24" width="19" height="19" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ t.ic }}"></path></svg></span>
+          <div style="font-size:13px;color:var(--label2);font-weight:600">{{ t.k }}</div>
+          <div style="font-family:var(--fontr);font-weight:700;font-size:18px;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ t.vc }}">{{ t.v }}</div>
+          <div style="font-size:12px;color:var(--label3)">{{ t.s }}</div>
+        </div>
+      </template>
+    </div>
+    <template sc-for list="{{ fx.secs }}" as="sec">
+      <div style="display:flex;align-items:center;gap:10px;margin:28px 4px 12px">
+        <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:0 auto 0 0">{{ sec.t }}</h2>
+        <template sc-if value="{{ sec.add }}"><button onClick="{{ fx.onAdd }}" style="border:0;background:var(--blue);color:#fff;border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">+ Aggiungi</button></template>
+      </div>
+      <template sc-if value="{{ sec.has }}">
+        <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+          <template sc-for list="{{ sec.items }}" as="r">
+            <button onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 14px;width:100%;text-align:left;background:none;border:0;position:relative">
+              <template sc-if value="{{ r.sep }}"><span style="position:absolute;left:60px;right:0;top:0;border-top:.5px solid var(--sep)"></span></template>
+              <span style="grid-row:1/3;width:34px;height:34px;border-radius:10px;background:{{ r.c }};color:#fff;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ r.ic }}"></path></svg></span>
+              <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}<template sc-if value="{{ r.last }}"><span style="display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:2px;text-transform:uppercase;background:color-mix(in srgb,#FF9500 18%,transparent);color:#C76A00">Ultimo mese</span></template></span>
+              <span style="font-family:var(--fontr);font-weight:600;text-align:right;white-space:nowrap;color:{{ r.ac }}">{{ r.amt }}</span>
+              <span style="grid-column:2/4;font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.m1 }}</span>
+              <span style="grid-column:2/4;font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.m2 }}</span>
+              <template sc-if value="{{ r.hasProg }}"><span style="grid-column:2/4;height:5px;background:var(--fill);border-radius:3px;overflow:hidden;margin-top:6px;display:block"><i style="display:block;height:100%;border-radius:3px;background:{{ r.c }};width:{{ r.prog }}"></i></span></template>
+            </button>
+          </template>
+        </div>
+      </template>
+      <template sc-if value="{{ sec.none }}">
+        <div style="background:var(--card);border-radius:20px;padding:30px 20px;text-align:center;color:var(--label2);box-shadow:var(--shadow)">
+          <span style="width:46px;height:46px;border-radius:14px;background:#5856D6;color:#fff;display:grid;place-items:center;margin:0 auto 12px"><svg viewBox="0 0 24 24" width="24" height="24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 2.5l3.5 3.5L17 9.5M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5M7 21.5 3.5 18 7 14.5M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"></path></svg></span>
+          <b style="color:var(--label)">{{ fx.noneT }}</b><br>Aggiungi rate, abbonamenti, bollette o lo stipendio: compariranno da soli in ogni mese della loro durata.
+        </div>
+      </template>
+    </template>
+    <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">Tocca una voce per cambiarne l'importo, chiuderla o eliminarla. Per cambiare un solo mese, aprila dalla lista movimenti di quel mese.</p>
+  </div>
+  </template>
+
+  <template sc-if value="{{ vImp }}" hint-placeholder-val="{{ false }}">
+  <div style="animation:rise .35s ease-out">
+    <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:16px 4px 12px">Saldi di partenza</h2>
+    <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+      <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;min-height:50px">
+        <span style="width:30px;height:30px;border-radius:9px;background:#FF9500;color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 6.5h16V20H4zM4 10.5h16M8.5 4v4M15.5 4v4"></path></svg></span>
+        <span style="flex:1;font-weight:500">Primo mese</span>
+        <input type="month" value="{{ im.startYM }}" onChange="{{ im.onStart }}" style="border:0;background:none;color:var(--blue);font-weight:600;text-align:right;font-size:16px">
+      </div>
+      <template sc-for list="{{ im.accs }}" as="a">
+        <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;position:relative">
+          <div style="position:absolute;left:54px;right:0;top:0;border-top:.5px solid var(--sep)"></div>
+          <span style="width:30px;height:30px;border-radius:9px;background:{{ a.grad }};color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 6h18v12H3zM3 10h18M7 14.5h4"></path></svg></span>
+          <input value="{{ a.name }}" onChange="{{ a.onName }}" aria-label="Nome conto" style="flex:1;min-width:0;border:0;background:none;padding:8px 0;font-size:16px;color:var(--label)">
+          <input value="{{ a.op }}" onChange="{{ a.onOp }}" inputmode="decimal" style="flex:0 0 112px;width:112px;text-align:right;font-family:var(--fontr);font-weight:600;background:var(--fill2);border:0;border-radius:9px;padding:7px 10px;font-size:16px;color:var(--label)">
+        </div>
+      </template>
+    </div>
+    <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">Per ogni conto: nome e saldo al primo giorno del primo mese. Per la carta di credito usa un numero negativo se hai un debito da saldare.</p>
+    <div style="display:flex;gap:8px;margin-top:10px"><button onClick="{{ im.onAddAcc }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">+ Conto</button></div>
+
+    <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Aspetto</h2>
+    <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px">
+      <template sc-for list="{{ im.themes }}" as="t"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};box-shadow:{{ t.sh }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px">{{ t.l }}</button></template>
+    </div>
+
+
+    <template sc-for list="{{ im.catGroups }}" as="g">
+      <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">{{ g.t }}</h2>
+      <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+        <template sc-for list="{{ g.items }}" as="c">
+          <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;position:relative">
+            <template sc-if value="{{ c.sep }}"><div style="position:absolute;left:54px;right:0;top:0;border-top:.5px solid var(--sep)"></div></template>
+            <span style="width:30px;height:30px;border-radius:9px;background:{{ c.c }};color:#fff;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" width="17" height="17" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ c.ic }}"></path></svg></span>
+            <input value="{{ c.n }}" onChange="{{ c.onName }}" aria-label="Nome categoria" style="flex:1;min-width:0;border:0;background:none;padding:8px 0;font-size:16px;color:var(--label)">
+            <button onClick="{{ c.onDel }}" style="border:0;background:{{ c.delBg }};color:{{ c.delC }};border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">{{ c.delL }}</button>
+          </div>
+        </template>
+      </div>
+      <div style="display:flex;margin-top:10px"><button onClick="{{ g.onAdd }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">+ Categoria</button></div>
+    </template>
+
+    <h2 style="font-family:var(--fontd);font-size:22px;font-weight:700;letter-spacing:-.025em;margin:28px 4px 12px">Copia di sicurezza</h2>
+    <div style="background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px;display:grid;gap:12px">
+      <div style="color:var(--label2);font-size:14px">Scarica tutti i tuoi dati in un file, oppure ripristinali da un file scaricato in precedenza.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onClick="{{ im.onExp }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">Scarica backup</button>
+        <button onClick="{{ im.onImp }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">Ripristina da file</button>
+      </div>
+    </div>
+    <button onClick="{{ im.onReset }}" style="width:100%;margin-top:20px;border:0;background:{{ im.resetBg }};color:{{ im.resetC }};border-radius:14px;padding:13px;font-weight:600;font-size:16px">{{ im.resetL }}</button>
+    <p style="font-size:13px;color:var(--label3);margin:10px 6px 0;line-height:1.45">I dati restano salvati solo su questo telefono, dentro l'app. Scarica un backup ogni tanto: ti serve se cambi telefono o cancelli i dati del browser.</p>
+  </div>
+  </template>
+
+  </div>
+</div>
+
+<template sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
+  <button onClick="{{ onFab }}" aria-label="Nuovo movimento" style="position:absolute;right:18px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:24;width:60px;height:60px;border-radius:50%;border:0;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 10px 26px -6px rgba(0,122,255,.6)"><svg viewBox="0 0 24 24" width="28" height="28" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round"><path d="M12 5v14M5 12h14"></path></svg></button>
+</template>
+<nav style="position:absolute;left:0;right:0;bottom:0;z-index:25;display:flex;padding:6px 4px calc(env(safe-area-inset-bottom) + 6px);background:color-mix(in srgb,var(--card) 84%,transparent);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)">
+  <template sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+    <button onClick="{{ t.onClick }}" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;padding:4px 0;font-size:10.5px;font-weight:600;color:{{ t.c }}">
+      <svg viewBox="0 0 24 24" width="25" height="25" style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="{{ t.ic }}"></path></svg>
+      <span>{{ t.l }}</span>
+    </button>
+  </template>
+</nav>
+</template>
+
+<template sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ sh.close }}" style="position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.38);display:flex;flex-direction:column;justify-content:flex-end;animation:fadeIn .2s ease-out">
+  <div onClick="{{ sh.stop }}" style="background:var(--bg);border-radius:28px 28px 0 0;max-height:calc(100% - env(safe-area-inset-top) - 24px);overflow-y:auto;scrollbar-width:none;padding:8px 18px calc(env(safe-area-inset-bottom) + 24px);animation:sheetUp .28s cubic-bezier(.2,.9,.3,1)">
+    <div style="width:38px;height:5px;border-radius:3px;background:var(--label3);opacity:.5;margin:0 auto 8px"></div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:14px">
+      <button onClick="{{ sh.close }}" style="justify-self:start;border:0;background:none;color:var(--blue);font-size:17px;padding:6px 0">Annulla</button>
+      <b style="font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">{{ sh.title }}</b>
+      <template sc-if value="{{ sh.hasRight }}"><button onClick="{{ sh.onRight }}" style="justify-self:end;border:0;background:none;color:{{ sh.rightC }};font-size:17px;font-weight:600;padding:6px 0">{{ sh.rightL }}</button></template>
+    </div>
+
+    <template sc-if value="{{ sh.isTx }}">
+      <div style="display:grid;gap:12px">
+        <template sc-if value="{{ sh.showSeg }}">
+          <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px">
+            <template sc-for list="{{ sh.types }}" as="t"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};color:{{ t.fg }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px">{{ t.l }}</button></template>
+          </div>
+        </template>
+        <div style="text-align:center;font-family:var(--fontr);font-weight:700;font-size:50px;letter-spacing:-.035em;line-height:1.1;padding:6px 0;color:{{ sh.amtC }};font-variant-numeric:tabular-nums;white-space:nowrap">{{ sh.amtT }}<span style="display:inline-block;width:3px;height:42px;background:var(--blue);margin-left:3px;vertical-align:-4px;border-radius:2px;animation:blink 1s steps(1) infinite"></span><span style="font-size:30px;margin-left:6px;opacity:.6">€</span></div>
+        <input value="{{ sh.n }}" onChange="{{ sh.onN }}" placeholder="Descrizione (es. Spesa Ekom, Benzina…)" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)">
+        <template sc-if value="{{ sh.showCat }}">
+          <div style="display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:0 18px;scrollbar-width:none">
+            <template sc-for list="{{ sh.cats }}" as="c"><button onClick="{{ c.onClick }}" style="flex:none;display:flex;align-items:center;gap:7px;border:0;border-radius:18px;padding:5px 12px 5px 5px;font-size:14px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }}"><span style="width:26px;height:26px;border-radius:50%;background:{{ c.c }};color:#fff;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="15" height="15" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="{{ c.ic }}"></path></svg></span>{{ c.n }}</button></template>
+          </div>
+        </template>
+        <template sc-for list="{{ sh.accRows }}" as="ar">
+          <div style="display:flex;gap:8px;align-items:center;overflow-x:auto;margin:0 -18px;padding:0 18px;scrollbar-width:none">
+            <span style="flex:none;font-size:13px;font-weight:600;color:var(--label2);width:44px">{{ ar.l }}</span>
+            <template sc-for list="{{ ar.items }}" as="a"><button onClick="{{ a.onClick }}" style="flex:none;border:0;border-radius:16px;padding:7px 12px;font-size:14px;font-weight:600;background:{{ a.bg }};color:{{ a.fg }};box-shadow:{{ a.sh }}">{{ a.n }}</button></template>
+          </div>
+        </template>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="flex:none;font-size:13px;font-weight:600;color:var(--label2);width:44px">Data</span>
+          <template sc-for list="{{ sh.dates }}" as="d"><button onClick="{{ d.onClick }}" style="flex:none;border:0;border-radius:16px;padding:7px 12px;font-size:14px;font-weight:600;background:{{ d.bg }};color:{{ d.fg }}">{{ d.l }}</button></template>
+          <input type="date" value="{{ sh.d }}" onChange="{{ sh.onD }}" style="flex:1;min-width:0;border:0;border-radius:16px;padding:6px 10px;font-size:14px;font-weight:600;background:var(--card);color:var(--blue)">
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px">
+          <template sc-for list="{{ sh.keys }}" as="k"><button onClick="{{ k.onClick }}" style="height:48px;border:0;border-radius:12px;background:var(--card);font-family:var(--fontr);font-size:25px;font-weight:500;color:var(--label);box-shadow:0 1px 0 rgba(0,0,0,.08);display:grid;place-items:center" class="key">{{ k.l }}</button></template>
+        </div>
+        <button onClick="{{ sh.onSave }}" style="border:0;background:var(--blue);color:#fff;border-radius:14px;padding:14px;font-weight:600;font-size:17px">Salva</button>
+        <template sc-if value="{{ sh.canDel }}"><button onClick="{{ sh.onDel }}" style="border:0;background:{{ sh.delBg }};color:{{ sh.delC }};border-radius:14px;padding:12px;font-weight:600;font-size:16px">{{ sh.delL }}</button></template>
+      </div>
+    </template>
+
+    <template sc-if value="{{ sh.isRec }}">
+      <div style="display:grid;gap:14px">
+        <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:var(--fill);border-radius:10px;padding:2px;gap:2px">
+          <template sc-for list="{{ sh.types }}" as="t"><button onClick="{{ t.onClick }}" style="border:0;background:{{ t.bg }};color:{{ t.fg }};padding:8px 6px;border-radius:8px;font-weight:600;font-size:14px">{{ t.l }}</button></template>
+        </div>
+        <input value="{{ sh.amt }}" onChange="{{ sh.onAmt }}" inputmode="decimal" placeholder="0,00 € al mese" style="border:0;background:var(--card);border-radius:12px;padding:16px;width:100%;font-family:var(--fontr);font-size:34px;font-weight:700;text-align:center;letter-spacing:-.03em;color:{{ sh.amtC }}">
+        <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600">Nome<input value="{{ sh.name }}" onChange="{{ sh.onName }}" placeholder="Es. Rata scooter, Internet casa, Stipendio" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"></label>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <template sc-if value="{{ sh.showCat }}"><label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">Categoria<select value="{{ sh.cat }}" onChange="{{ sh.onCat }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"><template sc-for list="{{ sh.catOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></template></select></label></template>
+          <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">Giorno del mese<input type="number" min="1" max="31" value="{{ sh.day }}" onChange="{{ sh.onDay }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"></label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">{{ sh.accL }}<select value="{{ sh.acc }}" onChange="{{ sh.onAcc }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"><template sc-for list="{{ sh.accOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></template></select></label>
+          <template sc-if value="{{ sh.showTo }}"><label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">Verso il conto<select value="{{ sh.to }}" onChange="{{ sh.onTo }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"><template sc-for list="{{ sh.accOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></template></select></label></template>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">Primo mese<input type="month" value="{{ sh.from }}" onChange="{{ sh.onFrom }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"></label>
+          <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600;min-width:0">Durata<select value="{{ sh.dur }}" onChange="{{ sh.onDur }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"><option value="none">Senza scadenza</option><option value="n">Numero di mesi</option></select></label>
+        </div>
+        <template sc-if value="{{ sh.showCount }}"><label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600">Numero di mesi (es. 24 rate)<input type="number" min="1" max="600" value="{{ sh.count }}" onChange="{{ sh.onCount }}" style="border:0;background:var(--card);border-radius:12px;padding:12px 14px;font-size:16px;width:100%;font-weight:500;color:var(--label)"></label></template>
+        <template sc-if value="{{ sh.isEdit }}">
+          <div style="font-size:13.5px;color:var(--label2);background:var(--card);border-radius:14px;padding:12px 14px">
+            <b style="color:var(--label)">Chiudi la voce</b><br>Termina questa voce dopo {{ sh.closeL }}, ad esempio quando cambi operatore internet.
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button onClick="{{ sh.onClose }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">Chiudi dopo {{ sh.closeL }}</button>
+              <template sc-if value="{{ sh.canReopen }}"><button onClick="{{ sh.onReopen }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">Senza scadenza</button></template>
+            </div>
+          </div>
+          <button onClick="{{ sh.onDel }}" style="border:0;background:{{ sh.delBg }};color:{{ sh.delC }};border-radius:14px;padding:12px;font-weight:600;font-size:16px">{{ sh.delL }}</button>
+        </template>
+      </div>
+    </template>
+
+    <template sc-if value="{{ sh.isInst }}">
+      <div style="display:grid;gap:14px">
+        <div style="font-size:13.5px;color:var(--label2);background:var(--card);border-radius:14px;padding:12px 14px">{{ sh.note }}</div>
+        <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600">{{ sh.amtL }}<input value="{{ sh.amt }}" onChange="{{ sh.onAmt }}" inputmode="decimal" style="border:0;background:var(--card);border-radius:12px;padding:16px;width:100%;font-family:var(--fontr);font-size:34px;font-weight:700;text-align:center;letter-spacing:-.03em;color:var(--label)"></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onClick="{{ sh.onSkip }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">{{ sh.skipL }}</button>
+          <template sc-if value="{{ sh.changed }}"><button onClick="{{ sh.onReset }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px">Importo standard</button></template>
+        </div>
+        <button onClick="{{ sh.onEditRec }}" style="justify-self:start;border:0;background:none;color:var(--blue);font-weight:600;font-size:15px;padding:4px 2px">Modifica la spesa fissa ›</button>
+      </div>
+    </template>
+
+    <template sc-if value="{{ sh.isAdj }}">
+      <div style="display:grid;gap:14px">
+        <div style="font-size:13.5px;color:var(--label2);background:var(--card);border-radius:14px;padding:12px 14px">Saldo calcolato oggi: <b style="font-family:var(--fontr);color:var(--label)">{{ sh.cur }}</b></div>
+        <label style="display:grid;gap:6px;font-size:13px;color:var(--label2);font-weight:600">Saldo reale che vedi nell'app della banca<input value="{{ sh.real }}" onChange="{{ sh.onReal }}" inputmode="decimal" placeholder="0,00 €" style="border:0;background:var(--card);border-radius:12px;padding:16px;width:100%;font-family:var(--fontr);font-size:34px;font-weight:700;text-align:center;letter-spacing:-.03em;color:var(--label)"></label>
+        <div style="font-size:13px;color:var(--label3);line-height:1.45">{{ sh.diff }}</div>
+      </div>
+    </template>
+
+    <template sc-if value="{{ sh.isPer }}">
+      <div style="display:grid;gap:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <button onClick="{{ sh.onYP }}" aria-label="Anno precedente" style="width:36px;height:36px;border-radius:50%;border:0;background:var(--fill);display:grid;place-items:center;color:var(--blue)"><svg viewBox="0 0 24 24" width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <b style="font-family:var(--fontd);font-size:24px;letter-spacing:-.02em">{{ sh.y }}</b>
+          <button onClick="{{ sh.onYN }}" aria-label="Anno successivo" style="width:36px;height:36px;border-radius:50%;border:0;background:var(--fill);display:grid;place-items:center;color:var(--blue)"><svg viewBox="0 0 24 24" width="18" height="18" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M9 5l7 7-7 7"></path></svg></button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+          <template sc-for list="{{ sh.months }}" as="mo"><button onClick="{{ mo.onClick }}" style="padding:12px 4px;border:0;border-radius:12px;font-weight:600;background:{{ mo.bg }};color:{{ mo.fg }};box-shadow:{{ mo.sh }}">{{ mo.l }}</button></template>
+        </div>
+        <button onClick="{{ sh.onToday }}" style="border:0;background:var(--fill);color:var(--blue);border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px">Torna a oggi</button>
+      </div>
+    </template>
+  </div>
+</div>
+</template>
+
+<template sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 12px);z-index:90;background:color-mix(in srgb,var(--label) 88%,transparent);color:var(--bg);padding:11px 18px;border-radius:22px;font-size:14.5px;font-weight:600;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.2);text-align:center;white-space:nowrap;animation:fadeIn .2s">{{ toast }}</div>
+</template>
+
+</div>
+</template>
+
+<script src="react.js"></script>
+<script>
+if (!window.React || !window.ReactDOM) {
+  document.querySelector('.boot').textContent = "Non riesco a caricare l'app. Controlla che il file react.js sia stato caricato su GitHub insieme a index.html.";
+} else {
+/* Mini-runtime: trasforma il template di Claude Design (sc-if, sc-for, {{ }}) in elementi React. */
+(function(){
+  const h = React.createElement;
+  const EV = {};
+  'click change input pointerdown pointermove pointerup pointercancel pointerleave keydown focus blur'.split(' ')
+    .forEach(n => { EV['on' + n] = 'on' + n.replace(/^pointer(.)/, (_, c) => 'Pointer' + c.toUpperCase()).replace(/^./, c => c.toUpperCase()); });
+  const ATTR = { 'class': 'className', inputmode: 'inputMode', 'for': 'htmlFor', tabindex: 'tabIndex', viewbox: 'viewBox' };
+  const RX = /\{\{\s*([^}]+?)\s*\}\}/g;
+
+  function lookup(path, scope){
+    if (path === 'true') return true; if (path === 'false') return false;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return +path;
+    const parts = path.split('.'); let v = scope;
+    for (const p of parts){ if (v == null) return undefined; v = v[p]; }
+    return v;
+  }
+  function interp(str, scope){
+    const m = str.match(/^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/);
+    if (m) return lookup(m[1], scope);
+    if (str.indexOf('{{') < 0) return str;
+    return str.replace(RX, (_, p) => { const v = lookup(p, scope); return v == null ? '' : String(v); });
+  }
+  const styleCache = new Map();
+  function parseStyle(s){
+    if (styleCache.has(s)) return styleCache.get(s);
+    const o = {};
+    let depth = 0, cur = '', parts = [];
+    for (const ch of s){ if (ch === '(') depth++; else if (ch === ')') depth--; if (ch === ';' && !depth){ parts.push(cur); cur = ''; } else cur += ch; }
+    parts.push(cur);
+    for (const decl of parts){
+      const i = decl.indexOf(':'); if (i < 0) continue;
+      let k = decl.slice(0, i).trim(); const v = decl.slice(i + 1).trim(); if (!k) continue;
+      if (!k.startsWith('--')) k = k.replace(/^-ms-/, 'ms-').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      o[k] = v;
+    }
+    if (styleCache.size > 4000) styleCache.clear();
+    styleCache.set(s, o);
+    return o;
+  }
+
+  // Compila il DOM del <template> in un albero leggero, una volta sola.
+  function compile(node, inSvg){
+    if (node.nodeType === 3){
+      const t = node.nodeValue;
+      if (!t.trim() && (inSvg || /\n/.test(t))) return null;
+      return { text: t.replace(/\s*\n\s*/g, ' ') };
+    }
+    if (node.nodeType !== 1) return null;
+    let tag = node.namespaceURI === 'http://www.w3.org/2000/svg' ? node.tagName : node.tagName.toLowerCase();
+    if (tag === 'template' && node.hasAttribute('sc-if')) tag = 'sc-if';
+    else if (tag === 'template' && node.hasAttribute('sc-for')) tag = 'sc-for';
+    const svg = inSvg || tag === 'svg';
+    const attrs = [];
+    for (const a of node.attributes){ if (a.name.startsWith('hint-') || a.name === 'sc-if' || a.name === 'sc-for') continue; attrs.push([a.name, a.value]); }
+    const children = [];
+    const kids = node.content ? node.content.childNodes : node.childNodes;
+    for (const c of kids){ const x = compile(c, svg || tag === 'select'); if (x) children.push(x); }
+    return { tag, attrs, children };
+  }
+
+  function renderList(list, scope){
+    const out = [];
+    list.forEach((n, i) => { const r = render(n, scope, i); if (r != null && r !== false) out.push(r); });
+    return out;
+  }
+  function render(n, scope, key){
+    if (n.text != null) return interp(n.text, scope);
+    if (n.tag === 'sc-if'){
+      const a = n.attrs.find(x => x[0] === 'value');
+      return interp(a ? a[1] : '', scope) ? h(React.Fragment, { key }, ...renderList(n.children, scope)) : null;
+    }
+    if (n.tag === 'sc-for'){
+      const la = n.attrs.find(x => x[0] === 'list'), aa = n.attrs.find(x => x[0] === 'as');
+      const list = interp(la ? la[1] : '', scope) || [];
+      const as = aa ? aa[1] : 'item';
+      return h(React.Fragment, { key }, ...list.map((item, i) => {
+        const sc = Object.create(scope); sc[as] = item;
+        return h(React.Fragment, { key: i }, ...renderList(n.children, sc));
+      }));
+    }
+    const props = { key };
+    for (const [name, raw] of n.attrs){
+      const v = interp(raw, scope);
+      if (EV[name]){ if (typeof v === 'function') props[EV[name]] = v; continue; }
+      if (name === 'style'){ props.style = parseStyle(String(v == null ? '' : v)); continue; }
+      if (name === 'ref'){ if (v) props.ref = v; continue; }
+      if (name === 'value'){ props.value = v == null ? '' : v; continue; }
+      props[ATTR[name] || name] = v;
+    }
+    if ((n.tag === 'input' || n.tag === 'select' || n.tag === 'textarea') && 'value' in props && !props.onChange) props.readOnly = true;
+    return h(n.tag, props, ...renderList(n.children, scope));
+  }
+
+  let compiled = null;
+  window.DCLogic = class extends React.Component {
+    render(){
+      if (!compiled){
+        const t = document.getElementById('app-template');
+        compiled = compile(t, false).children;
+      }
+      const vals = this.renderVals();
+      const out = renderList(compiled, vals);
+      return out.length === 1 ? out[0] : h(React.Fragment, null, ...out);
+    }
+  };
+})();
+
+
+class Component extends DCLogic {
+  MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  MB=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  GG=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+  IP={casa:'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',spesa:'M3 4h2.2l2.3 11h11l2-8H6.2M9.5 20h.01M17.5 20h.01',bar:'M5 8h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 9.5h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3v2.5M12 3v2.5',bolt:'M13 2 4.5 13.5H11L10 22l8.5-11.5H12z',rep:'M17 2.5l3.5 3.5L17 9.5M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5M7 21.5 3.5 18 7 14.5M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5',auto:'M5 17.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0M15 17.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0M9 17.5h6M3 17.5V12l2-5h11l3.5 5H21v5.5h-2M3 12h18',star:'M12 3.2l2.6 5.5 6 .8-4.4 4.1 1.1 6L12 16.7l-5.3 2.9 1.1-6L3.4 9.5l6-.8z',plane:'M21.5 2.5 10.5 13.5M21.5 2.5l-7 19-4-8.5-8.5-4z',heart:'M12 20.5s-7.5-4.6-9.6-9.3A5.2 5.2 0 0 1 12 6.6a5.2 5.2 0 0 1 9.6 4.6C19.5 15.9 12 20.5 12 20.5z',bag:'M5.5 7.5h13l1 13.5h-15zM9 7.5a3 3 0 0 1 6 0',gift:'M4 11.5h16V21H4zM3 7.5h18v4H3zM12 7.5V21M12 7.5S10.8 3.5 8.5 3.5a2 2 0 0 0 0 4M12 7.5s1.2-4 3.5-4a2 2 0 0 1 0 4',book:'M3.5 5h6A2.5 2.5 0 0 1 12 7.5V20a2 2 0 0 0-2-2H3.5zM20.5 5h-6A2.5 2.5 0 0 0 12 7.5V20a2 2 0 0 1 2-2h6.5z',dots:'M4.5 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0M10.5 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0M16.5 12a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0',work:'M3 7.5h18V20H3zM8.5 7.5V5.5A2 2 0 0 1 10.5 3.5h3a2 2 0 0 1 2 2v2M3 12.5h18',back:'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3',tag:'M3 12.5V4h8.5l9.5 9.5-8.5 8.5zM7.5 8h.01',plus:'M12 5v14M5 12h14',swap:'M4 8h15l-4-4M20 16H5l4 4',adj:'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',cal:'M4 6.5h16V20H4zM4 10.5h16M8.5 4v4M15.5 4v4',pie:'M12 3v9h9A9 9 0 1 1 12 3zM15 3.5a9 9 0 0 1 5.5 5.5H15z',card:'M3 6h18v12H3zM3 10h18M7 14.5h4',gear:'M18.57 9.58L21.25 10.35L21.25 13.65L18.57 14.42L18.36 14.93L19.71 17.37L17.37 19.71L14.93 18.36L14.42 18.57L13.65 21.25L10.35 21.25L9.58 18.57L9.07 18.36L6.63 19.71L4.29 17.37L5.64 14.93L5.43 14.42L2.75 13.65L2.75 10.35L5.43 9.58L5.64 9.07L4.29 6.63L6.63 4.29L9.07 5.64L9.58 5.43L10.35 2.75L13.65 2.75L14.42 5.43L14.93 5.64L17.37 4.29L19.71 6.63L18.36 9.07ZM12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z',up:'M12 19V5M6 11l6-6 6 6',down:'M12 5v14M6 13l6 6 6-6',piggy:'M5 11a7 6 0 0 1 12.5-2.5H20v4l-2 1-1.5 3.5H14v-1.5h-4V17H7.5L6 13.5H4V10.5zM14.5 9.5h.01',edit:'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',skip:'M5 5l14 14M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z'};
+  CM={casa:['#5856D6','casa'],'cibo-e-spesa':['#FF9500','spesa'],'bar-e-ristoranti':['#A2845E','bar'],'bollette-e-servizi':['#F5B400','bolt'],abbonamenti:['#AF52DE','rep'],veicoli:['#007AFF','auto'],svago:['#FF2D55','star'],viaggi:['#32ADE6','plane'],'spese-mediche':['#00B8A9','heart'],'oggetti-personali':['#8E5CF6','bag'],regali:['#E0457B','gift'],formazione:['#0040DD','book'],altro:['#8E8E93','dots'],'in-stipendio':['#34C759','work'],'in-rimborsi':['#30B0C7','back'],'in-vendite':['#00C7BE','tag'],'in-regali-ricevuti':['#34C759','gift'],'in-altre-entrate':['#34C759','plus']};
+  XPAL=['#FF9500','#5856D6','#32ADE6','#AF52DE','#FF2D55','#00B8A9','#007AFF','#A2845E'];
+  GRADS=[['#0A84FF','#5E5CE6'],['#3A3A3C','#111113'],['#BF5AF2','#FF375F'],['#14B8A6','#0E7490'],['#FF453A','#FF9F0A'],['#30D158','#0F9D58'],['#FF9F0A','#F59E0B'],['#64D2FF','#5E5CE6'],['#FF375F','#BF5AF2']];
+  DEFG={banca:0,cc:1,revolut:2,tr:3,satispay:4,cash:5};
+  E2=new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'});
+  E0=new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+  scrollRef=React.createRef();
+  drag=null;
+  get W1(){return Math.round(Math.min(window.innerWidth,520)-32)}
+  get W2(){return Math.round(Math.min(window.innerWidth,520)-68)}
+  state=this.init();
+
+  init(){
+    this.TODAY=this.iso(new Date());this.CUR=this.TODAY.slice(0,7);
+    let s=null;try{s=JSON.parse(localStorage.getItem('bp-proto-v1')||'null')}catch(e){}
+    const p=(this.props&&this.props.screen)||'App';
+    return {cfg:s&&s.cfg||null,tx:s&&s.tx||[],rec:s&&s.rec||[],ov:s&&s.ov||{},view:'mese',ym:this.CUR,range:'m',acc:'',catF:'',anTab:'mese',win:90,fcAcc:'',barSel:null,sheet:null,swipe:null,dragging:false,scrub:null,toast:null,themeO:(()=>{try{return localStorage.getItem('bp-theme')}catch(e){return null}})(),preview:this.scrOf(p),setupYM:this.CUR,setupBal:{},openEdit:{},armed:null};
+  }
+  scrOf(p){return {'Schermata di blocco':'lock','Home con widget':'home'}[p]||null}
+  componentDidMount(){if(this.props.demoData&&!this.state.cfg)this.loadDemo();this._rs=()=>this.forceUpdate();window.addEventListener('resize',this._rs);this._vis=()=>{if(document.visibilityState!=='visible')return;const t=this.iso(new Date());if(t!==this.TODAY){const oc=this.CUR;this.TODAY=t;this.CUR=t.slice(0,7);this.setState(s=>({ym:s.ym===oc?this.CUR:s.ym}))}};document.addEventListener('visibilitychange',this._vis);this.syncChrome()}
+  componentDidUpdate(pp,ps){
+    const s=this.state;
+    if(ps.cfg!==s.cfg||ps.tx!==s.tx||ps.rec!==s.rec||ps.ov!==s.ov){try{localStorage.setItem('bp-proto-v1',JSON.stringify({cfg:s.cfg,tx:s.tx,rec:s.rec,ov:s.ov}))}catch(e){}}
+    if(pp.demoData!==this.props.demoData){this.props.demoData?this.loadDemo():this.setState({cfg:null,tx:[],rec:[],ov:{},sheet:null,view:'mese',ym:this.CUR})}
+    if(pp.screen!==this.props.screen)this.setState({preview:this.scrOf(this.props.screen),sheet:null});
+    if(ps.themeO!==s.themeO){try{s.themeO?localStorage.setItem('bp-theme',s.themeO):localStorage.removeItem('bp-theme')}catch(e){}}
+    this.syncChrome();
+  }
+  componentWillUnmount(){clearTimeout(this._tt);window.removeEventListener('resize',this._rs);document.removeEventListener('visibilitychange',this._vis)}
+  syncChrome(){const dark=(this.state.themeO||this.props.theme||'Chiaro')==='Scuro';const c=dark?'#000000':'#F2F2F7';if(this._chrome===c)return;this._chrome=c;document.documentElement.style.background=c;document.body.style.background=c;document.documentElement.style.colorScheme=dark?'dark':'light';const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',c)}
+  exportBackup(){const s=this.state;const data=JSON.stringify({app:'bilancio',v:1,saved:new Date().toISOString(),cfg:s.cfg,tx:s.tx,rec:s.rec,ov:s.ov},null,1);const name='bilancio-backup-'+this.TODAY+'.json';const file=new File([data],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Backup Bilancio'}).catch(()=>{});return}const u=URL.createObjectURL(file);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);this.toast('Backup scaricato')}
+  importBackup(){const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{let d=null;try{d=JSON.parse(r.result)}catch(e){}if(!d||!d.cfg||!Array.isArray(d.cfg.accounts)||!Array.isArray(d.tx))return this.toast('Questo file non è un backup valido');this.setState({cfg:d.cfg,tx:d.tx||[],rec:d.rec||[],ov:d.ov||{},view:'mese',ym:this.CUR,sheet:null,openEdit:{},armed:null});this.toast('Dati ripristinati')};r.readAsText(f)};inp.click()}
+
+  pad(n){return String(n).padStart(2,'0')}
+  iso(t){return t.getFullYear()+'-'+this.pad(t.getMonth()+1)+'-'+this.pad(t.getDate())}
+  ymAdd(ym,k){let y=+ym.slice(0,4),m=+ym.slice(5,7)+k;y+=Math.floor((m-1)/12);m=((m-1)%12+12)%12+1;return y+'-'+this.pad(m)}
+  ymDiff(a,b){return (+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice(5,7))}
+  dim(ym){return new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate()}
+  addDays(d,k){return this.iso(new Date(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10)+k))}
+  dayDiff(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5)}
+  ymLabel(ym){return this.MESI[+ym.slice(5,7)-1]+' '+ym.slice(0,4)}
+  ymShort(ym){return this.MB[+ym.slice(5,7)-1]+' '+ym.slice(0,4)}
+  dShort(d){return (+d.slice(8,10))+' '+this.MB[+d.slice(5,7)-1].toLowerCase()}
+  dLong(d){const t=new Date(d+'T12:00:00');return this.GG[t.getDay()]+' '+t.getDate()+' '+this.MESI[t.getMonth()].toLowerCase()+(d.slice(0,4)!==this.TODAY.slice(0,4)?' '+d.slice(0,4):'')}
+  fmt(v){return this.E2.format(Math.round(v*100)/100+0)}
+  fmt0(v){return this.E0.format(Math.round(v)+0)}
+  fmtS(v){return (v>0.004?'+':v<-0.004?'−':'')+this.E2.format(Math.abs(Math.round(v*100)/100))}
+  fmtS0(v){return (v>0.5?'+':v<-0.5?'−':'')+this.E0.format(Math.abs(Math.round(v)))}
+  fmtT(v){return Math.abs(v)>=1000?this.fmt0(v):this.fmt(v)}
+  fmtTS(v){return Math.abs(v)>=1000?this.fmtS0(v):this.fmtS(v)}
+  parseAmt(s){s=String(s||'').trim().replace(/\s|€/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isFinite(n)?Math.round(n*100)/100:NaN}
+  amtIn(n){return n==null||isNaN(n)?'':String(n).replace('.',',')}
+  uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4)}
+  hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
+  slug(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+  toast(msg){clearTimeout(this._tt);this.setState({toast:msg});this._tt=setTimeout(()=>this.setState({toast:null}),2200)}
+
+  defaultCfg(startYM){
+    const out=['Casa','Cibo e spesa','Bar e ristoranti','Bollette e servizi','Abbonamenti','Veicoli','Svago','Viaggi','Spese mediche','Oggetti personali','Regali','Formazione','Altro'];
+    const inc=['Stipendio','Rimborsi','Vendite','Regali ricevuti','Altre entrate'];
+    return {startYM,opening:{},accounts:[['banca','Banca principale'],['cc','Carta di credito'],['revolut','Revolut'],['tr','Trade Republic'],['satispay','Satispay'],['cash','Contanti']].map(([id,name])=>({id,name})),
+      cats:{out:out.map(n=>({id:this.slug(n),name:n})),in:inc.map(n=>({id:'in-'+this.slug(n),name:n}))}};
+  }
+  loadDemo(){
+    const startYM=this.ymAdd(this.CUR,-3);const cfg=this.defaultCfg(startYM);
+    cfg.opening={banca:3200,cc:-240,revolut:450,tr:5200,satispay:60,cash:80};
+    const rec=[
+      {id:'r1',name:'Affitto',a:650,day:1,t:'out',cat:'casa',acc:'banca',from:startYM,until:null},
+      {id:'r2',name:'Stipendio',a:1850,day:27,t:'in',cat:'in-stipendio',acc:'banca',from:startYM,until:null},
+      {id:'r3',name:'Internet casa',a:29.9,day:5,t:'out',cat:'bollette-e-servizi',acc:'banca',from:startYM,until:null},
+      {id:'r4',name:'Luce e gas',a:68,day:18,t:'out',cat:'bollette-e-servizi',acc:'banca',from:startYM,until:null},
+      {id:'r5',name:'Spotify',a:10.99,day:12,t:'out',cat:'abbonamenti',acc:'cc',from:startYM,until:null},
+      {id:'r6',name:'Rata scooter',a:89,day:15,t:'out',cat:'veicoli',acc:'banca',from:this.ymAdd(this.CUR,-8),until:this.ymAdd(this.CUR,15)},
+      {id:'r7',name:'Piano di accumulo',a:200,day:28,t:'tr',acc:'banca',to:'tr',from:startYM,until:null}];
+    let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+    const pick=a=>a[Math.floor(rnd()*a.length)];
+    const tx=[];
+    for(let d=startYM+'-01';d<=this.TODAY;d=this.addDays(d,1)){
+      if(rnd()<.45)tx.push({id:this.uid(),d,t:'out',a:Math.round((12+rnd()*60)*100)/100,acc:pick(['revolut','cc','banca']),cat:'cibo-e-spesa',n:pick(['Esselunga','Lidl','Mercato','Coop'])});
+      if(rnd()<.4)tx.push({id:this.uid(),d,t:'out',a:Math.round((2+rnd()*22)*100)/100,acc:pick(['satispay','cash','revolut']),cat:'bar-e-ristoranti',n:pick(['Caffè','Pizzeria','Aperitivo','Sushi'])});
+      if(rnd()<.08)tx.push({id:this.uid(),d,t:'out',a:Math.round((30+rnd()*15)*100)/100,acc:'cc',cat:'veicoli',n:'Benzina scooter'});
+      if(rnd()<.07)tx.push({id:this.uid(),d,t:'out',a:Math.round((10+rnd()*45)*100)/100,acc:'cc',cat:pick(['svago','oggetti-personali','formazione']),n:pick(['Cinema','Amazon','Libreria','Concerto'])});
+      if(rnd()<.03)tx.push({id:this.uid(),d,t:'in',a:Math.round((15+rnd()*60)*100)/100,acc:'revolut',cat:'in-rimborsi',n:'Rimborso cena'});
+    }
+    this.setState({cfg,tx,rec,ov:{},view:'mese',ym:this.CUR,sheet:null});
+  }
+
+  catMeta(id){const cfg=this.state.cfg;const c=cfg?[...cfg.cats.out,...cfg.cats.in].find(c=>c.id===id):null;const m=this.CM[id];const isIn=id&&id.startsWith('in-');
+    return {name:c?c.name:'Senza categoria',color:m?m[0]:(isIn?'#34C759':this.XPAL[this.hash(id||'x')%this.XPAL.length]),ic:this.IP[m?m[1]:(isIn?'plus':'dots')]}}
+  accGrad(a){const i=a.c!=null?a.c:(this.DEFG[a.id]!=null?this.DEFG[a.id]:6+this.hash(a.id)%3);const g=this.GRADS[i%this.GRADS.length];return `linear-gradient(140deg,${g[0]},${g[1]})`}
+  accName(id){return (this.state.cfg.accounts.find(a=>a.id===id)||{name:'Conto rimosso'}).name}
+  recActive(r,ym){return ym>=r.from&&(!r.until||ym<=r.until)}
+  entriesFor(ym){
+    const {cfg,tx,rec,ov}=this.state;if(!cfg||ym<cfg.startYM)return [];
+    const L=tx.filter(t=>t.d.slice(0,7)===ym).map(t=>({...t,src:'tx'}));const D=this.dim(ym);const o=ov[ym]||{};
+    for(const r of rec){if(!this.recActive(r,ym))continue;const x=o[r.id];
+      L.push({id:'r:'+r.id+':'+ym,rid:r.id,d:ym+'-'+this.pad(Math.min(r.day||1,D)),t:r.t,a:x&&x.a!=null?x.a:r.a,acc:r.acc,to:r.to,cat:r.cat,n:r.name,src:'rec',skip:!!(x&&x.skip),changed:!!(x&&x.a!=null)})}
+    return L;
+  }
+  ledger(endYM){
+    if(this._led&&this._led.end>=endYM)return this._led.list;
+    const sy=this.state.cfg.startYM;if(!/^\d{4}-\d{2}$/.test(sy)||!/^\d{4}-\d{2}$/.test(endYM))return [];
+    const list=[];let g=0;for(let ym=sy;ym<=endYM&&g++<600;ym=this.ymAdd(ym,1))for(const e of this.entriesFor(ym))if(!e.skip)list.push(e);
+    list.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);this._led={end:endYM,list};return list;
+  }
+  delta(e,acc){if(e.t==='tr'){if(!acc)return 0;return (e.acc===acc?-e.a:0)+(e.to===acc?e.a:0)}if(acc&&e.acc!==acc)return 0;return e.t==='out'?-e.a:e.a}
+  opening(acc){const c=this.state.cfg;return acc?(+c.opening[acc]||0):c.accounts.reduce((s,a)=>s+(+c.opening[a.id]||0),0)}
+  balanceAt(date,acc){const c=this.state.cfg;if(date<c.startYM+'-01')return null;let b=this.opening(acc);for(const e of this.ledger(date.slice(0,7))){if(e.d>date)break;b+=this.delta(e,acc)}return b}
+  rates(win,acc){
+    const start=this.state.cfg.startYM+'-01';const from=this.addDays(this.TODAY,-win+1);let o=0,i=0;
+    for(const e of this.ledger(this.CUR)){if(e.src!=='tx'||e.d>this.TODAY||e.d<from)continue;if(acc&&e.acc!==acc)continue;if(e.t==='out')o+=e.a;else if(e.t==='in')i+=e.a}
+    const days=Math.max(1,Math.min(win,this.dayDiff(start,this.TODAY)+1));return {out:o/days,in:i/days,days};
+  }
+  series(from,to,acc){
+    const start=this.state.cfg.startYM+'-01';if(to<start)return [];
+    const L=this.ledger(to.slice(0,7));const r=this.rates(this.state.win,acc);const net=r.in-r.out;let b=this.opening(acc),i=0;const out=[];
+    let g=0;for(let d=start;d<=to&&g++<4000;d=this.addDays(d,1)){while(i<L.length&&L[i].d<=d){b+=this.delta(L[i],acc);i++}if(d>this.TODAY)b+=net;if(d>=from)out.push({d,v:b,fc:d>this.TODAY})}
+    return out;
+  }
+  monthTotals(ym){let inc=0,out=0,fix=0;const byCat={};for(const e of this.entriesFor(ym)){if(e.skip)continue;if(e.t==='in')inc+=e.a;else if(e.t==='out'){out+=e.a;if(e.src==='rec')fix+=e.a;byCat[e.cat]=(byCat[e.cat]||0)+e.a}}return {inc,out,fix,byCat}}
+
+  mono(P){
+    const n=P.length;if(n<2)return '';const dx=[],m=[],t=[];
+    for(let i=0;i<n-1;i++){dx[i]=P[i+1][0]-P[i][0];m[i]=(P[i+1][1]-P[i][1])/(dx[i]||1)}
+    t[0]=m[0];t[n-1]=m[n-2];for(let i=1;i<n-1;i++)t[i]=m[i-1]*m[i]<=0?0:(m[i-1]+m[i])/2;
+    for(let i=0;i<n-1;i++){if(m[i]===0){t[i]=0;t[i+1]=0;continue}const a=t[i]/m[i],b=t[i+1]/m[i],s=a*a+b*b;if(s>9){const k=3/Math.sqrt(s);t[i]=k*a*m[i];t[i+1]=k*b*m[i]}}
+    let d=`M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
+    for(let i=0;i<n-1;i++){const h=dx[i]/3;d+=`C${(P[i][0]+h).toFixed(1)} ${(P[i][1]+t[i]*h).toFixed(1)} ${(P[i+1][0]-h).toFixed(1)} ${(P[i+1][1]-t[i+1]*h).toFixed(1)} ${P[i+1][0].toFixed(1)} ${P[i+1][1].toFixed(1)}`}
+    return d;
+  }
+  chart(pts,W,H,hero,k){
+    const z={line:'',area:'',fcLine:'',fcArea:'',dx:0,dy:0,dotOp:0,cx:0,cy:0,curOp:0,zeroY:-10};
+    if(pts.length<2)return z;
+    const pt=14,pb=10;const vs=pts.map(p=>p.v);let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<1){hi+=50;lo-=50}const pd=(hi-lo)*.12;lo-=pd;hi+=pd;
+    const X=i=>i*W/(pts.length-1),Y=v=>pt+(1-(v-lo)/(hi-lo))*(H-pt-pb);
+    const P=pts.map((p,i)=>[X(i),Y(p.v)]);const fi=pts.findIndex(p=>p.fc);const ai=fi===-1?pts.length:fi;
+    const act=P.slice(0,ai),fc=fi===-1?[]:P.slice(Math.max(0,ai-1));
+    const la=act.length>1?this.mono(act):'',lf=fc.length>1?this.mono(fc):'';
+    const o={...z,line:la,fcLine:lf,area:la?la+`L${act[act.length-1][0]} ${H}L${act[0][0]} ${H}Z`:'',fcArea:lf?lf+`L${fc[fc.length-1][0]} ${H}L${fc[0][0]} ${H}Z`:'',zeroY:(!hero&&lo<0&&hi>0)?Y(0):-10};
+    if(ai>0){o.dx=P[ai-1][0];o.dy=P[ai-1][1];o.dotOp=1}
+    const sc=this.state.scrub;if(sc&&sc.k===k&&P[sc.i]){o.cx=P[sc.i][0];o.cy=P[sc.i][1];o.curOp=1}
+    return o;
+  }
+  scrubber(k,n){return e=>{const r=e.currentTarget.getBoundingClientRect();let i=Math.round((e.clientX-r.left)/r.width*(n-1));i=Math.max(0,Math.min(n-1,i));const s=this.state.scrub;if(!s||s.k!==k||s.i!==i)this.setState({scrub:{k,i}})}}
+  xl(pts){if(pts.length<2)return [];return [0,Math.floor((pts.length-1)/2),pts.length-1].map(i=>this.dShort(pts[i].d))}
+  seg(list,cur,fn){return list.map(([k,l])=>({l,bg:k===cur?'var(--card)':'transparent',sh:k===cur?'0 1px 4px rgba(0,0,0,.14)':'none',onClick:()=>fn(k)}))}
+  setView(v){this.setState({view:v,swipe:null,scrub:null,armed:null});const el=this.scrollRef.current;if(el)el.scrollTop=0}
+
+  renderVals(){
+    this._led=null;
+    const s=this.state,P=this.props;
+    const theme=(s.themeO||P.theme||'Chiaro')==='Scuro'?'dark':'light';
+    const pv=s.preview;const isSetup=!pv&&!s.cfg,isApp=!pv&&!!s.cfg;
+    const o={theme,isDark:theme==='dark'||!!pv,isLock:pv==='lock',isHome:pv==='home',isSetup,isApp,toast:s.toast,hasToast:!!s.toast,scrollRef:this.scrollRef,W1:this.W1,W2:this.W2,
+      offScrub:()=>this.state.scrub&&this.setState({scrub:null}),hasSheet:!!s.sheet&&!pv};
+    if(pv)o.w=this.widgetVals();
+    if(isSetup)o.su=this.setupVals();
+    if(isApp){
+      const v=s.view,cfg=s.cfg;
+      const T=[['mese','Mese','cal'],['analisi','Analisi','pie'],['conti','Conti','card'],['fisse','Fisse','rep'],['imp','Impostazioni','gear']];
+      o.tabs=T.map(([k,l,ic])=>({l,ic:this.IP[ic],c:k===v?'var(--blue)':'var(--label3)',onClick:()=>this.setView(k)}));
+      o.hd=v==='imp'?{title:'Impostazioni',sub:'',nav:false,onTitle:()=>{}}:{title:this.MESI[+s.ym.slice(5,7)-1],sub:s.ym.slice(0,4),nav:true,
+        onTitle:()=>this.setState({sheet:{mode:'per',y:+s.ym.slice(0,4)}}),onPrev:()=>this.setState({ym:this.ymAdd(s.ym,-1),barSel:null,swipe:null}),onNext:()=>this.setState({ym:this.ymAdd(s.ym,1),barSel:null,swipe:null})};
+      o.accOpts=[{v:'',l:'Tutti i conti'},...cfg.accounts.map(a=>({v:a.id,l:a.name}))];
+      const before=(v==='mese'||v==='conti'||(v==='analisi'&&s.anTab==='mese'))&&s.ym<cfg.startYM;
+      o.before=before;o.beforeText='La contabilità parte da '+this.ymLabel(cfg.startYM)+'.';o.startLabel='Vai a '+this.ymLabel(cfg.startYM);o.onStart=()=>this.setState({ym:cfg.startYM});
+      o.vMese=v==='mese'&&!before;o.vAn=v==='analisi';o.vConti=v==='conti'&&!before;o.vFisse=v==='fisse';o.vImp=v==='imp';
+      o.showFab=v==='mese'&&!s.sheet;o.onFab=()=>this.openTx(null);
+      if(o.vMese)o.m=this.meseVals();
+      if(o.vAn)o.an=this.anVals();
+      if(o.vConti)o.ct=this.contiVals();
+      if(o.vFisse)o.fx=this.fisseVals();
+      if(o.vImp)o.im=this.impVals();
+      if(s.sheet)o.sh=this.sheetVals();
+    }
+    return o;
+  }
+
+  setupVals(){
+    const s=this.state;const c=this.defaultCfg(s.setupYM);
+    return {ym:s.setupYM,onYM:e=>this.setState({setupYM:e.target.value||this.CUR}),
+      accs:c.accounts.map(a=>({name:a.name,grad:this.accGrad(a),val:s.setupBal[a.id]||'',onChange:e=>{const v=e.target.value;this.setState(st=>({setupBal:{...st.setupBal,[a.id]:v}}))}})),
+      go:()=>{const cfg=this.defaultCfg(s.setupYM||this.CUR);
+        for(const a of cfg.accounts){const raw=(s.setupBal[a.id]||'').trim();const v=raw?this.parseAmt(raw):0;if(isNaN(v))return this.toast('Controlla il saldo di '+a.name);cfg.opening[a.id]=v}
+        this.setState({cfg,ym:this.CUR<cfg.startYM?cfg.startYM:this.CUR,view:'mese'});this.toast('Pronto! Aggiungi le spese fisse in Fisse')}};
+  }
+
+  rowOf(e,idx,openFn){
+    const s=this.state;const fut=e.d>this.TODAY;let amt,ac,meta,c,ic;
+    if(e.t==='tr'){amt=this.fmt(e.a);ac='var(--label)';meta=this.accName(e.acc)+' → '+this.accName(e.to);c='#8E8E93';ic=this.IP.swap}
+    else if(e.t==='adj'){amt=this.fmtS(e.a);ac='var(--label2)';meta='Rettifica · '+this.accName(e.acc);c='#8E8E93';ic=this.IP.adj}
+    else{const m=this.catMeta(e.cat);amt=(e.t==='out'?'−':'+')+this.fmt(e.a);ac=e.t==='out'?'var(--exp)':'var(--inc)';meta=m.name+' · '+this.accName(e.acc);c=m.color;ic=m.ic}
+    const badges=[];if(e.src==='rec')badges.push({t:'Fissa',bg:'color-mix(in srgb,var(--blue) 14%,transparent)',fg:'var(--blue)'});if(e.skip)badges.push({t:'Saltata',bg:'var(--fill)',fg:'var(--label2)'});if(fut&&!e.skip)badges.push({t:'Prevista',bg:'var(--fill)',fg:'var(--label2)'});
+    const key=e.id;const sw=s.swipe&&s.swipe.id===key?s.swipe:null;
+    const actions=e.src==='rec'?[{l:e.skip?'Ripristina':'Salta',bg:'#8E8E93',ic:this.IP.skip,onClick:()=>this.toggleSkip(e)},{l:'Modifica',bg:'var(--blue)',ic:this.IP.edit,onClick:()=>this.openInst(e)}]
+      :[{l:'Modifica',bg:'var(--blue)',ic:this.IP.edit,onClick:()=>this.openTx(e)},{l:'Elimina',bg:'var(--expf)',ic:this.IP.trash,onClick:()=>this.delTx(e)}];
+    return {t:e.n||this.catMeta(e.cat).name,badges,meta,amt,ac,c,ic,op:fut||e.skip?.55:1,deco:e.skip?'line-through':'none',changed:!!e.changed,sep:idx>0,actions,
+      tx:`translateX(${sw?sw.dx:0}px)`,tr:sw&&s.dragging?'none':'transform .25s cubic-bezier(.2,.9,.3,1)',
+      pd:ev=>{this.drag={id:key,x0:ev.clientX,y0:ev.clientY,dx0:sw?sw.dx:0,moved:false,h:null}},
+      pm:ev=>{const d=this.drag;if(!d||d.id!==key)return;const dx=ev.clientX-d.x0,dy=ev.clientY-d.y0;
+        if(d.h===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){d.h=Math.abs(dx)>Math.abs(dy);if(d.h){try{ev.currentTarget.setPointerCapture(ev.pointerId)}catch(_){}}}
+        if(d.h){d.moved=true;this.setState({swipe:{id:key,dx:Math.max(-148,Math.min(0,d.dx0+dx))},dragging:true})}},
+      pu:()=>{const d=this.drag;this.drag=null;if(!d||d.id!==key)return;
+        if(d.moved){const cur=this.state.swipe;this.setState({dragging:false,swipe:cur&&cur.dx<-60?{id:key,dx:-148}:null});return}
+        if(d.h)return;
+        if(this.state.swipe){this.setState({swipe:null});return}
+        openFn()}};
+  }
+  delTx(e){this.setState(s=>({tx:s.tx.filter(x=>x.id!==e.id),swipe:null,sheet:null}));this.toast('Movimento eliminato')}
+  toggleSkip(e){const ym=e.d.slice(0,7);this.setState(s=>{const ov={...s.ov};const m={...(ov[ym]||{})};const x={...(m[e.rid]||{})};if(x.skip)delete x.skip;else x.skip=true;if(Object.keys(x).length)m[e.rid]=x;else delete m[e.rid];ov[ym]=m;return {ov,swipe:null}});this.toast(e.skip?'Ripristinata':'Saltata per questo mese')}
+
+  heroRange(ym){const end=ym+'-'+this.pad(this.dim(ym));const k={m:1,'3':3,'6':6,'12':12}[this.state.range]||1;let from=this.ymAdd(ym,-(k-1))+'-01';const st=this.state.cfg.startYM+'-01';if(from<st)from=st;return {from,end}}
+  meseVals(){
+    const s=this.state,cfg=s.cfg,ym=s.ym;
+    const T=this.monthTotals(ym);const {from,end}=this.heroRange(ym);const acc=s.acc||null;
+    const pts=this.series(from,end,acc);const fi=pts.findIndex(p=>p.fc);
+    const cur=ym>this.CUR?pts[pts.length-1]:pts[fi===-1?pts.length-1:Math.max(0,fi-1)];
+    const sb=this.balanceAt(this.addDays(from,-1),acc);const startV=sb==null?this.opening(acc):sb;
+    const lblBase=(acc?this.accName(acc):'Saldo totale')+' · '+(ym>this.CUR?'previsto a fine mese':cur&&cur.d===this.TODAY?'oggi':cur?this.dShort(cur.d):'');
+    const diff=cur?cur.v-startV:0;const eom=pts[pts.length-1];
+    const hc=this.chart(pts,this.W1,150,true,'hero');
+    const sp=s.scrub&&s.scrub.k==='hero'?pts[s.scrub.i]:null;
+    const sav=T.inc-T.out;const rate=T.inc>0?Math.round(sav/T.inc*100):null;
+    let list=this.entriesFor(ym);if(s.catF)list=list.filter(e=>e.cat===s.catF);
+    list.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(a.src==='rec')-(b.src==='rec'));
+    const g={};for(const e of list)(g[e.d]=g[e.d]||[]).push(e);
+    const days=Object.keys(g).map(d=>{const L=g[d];const net=L.reduce((t,e)=>t+(e.skip||e.t==='tr'||e.t==='adj'?0:e.t==='out'?-e.a:e.a),0);
+      return {label:d===this.TODAY?'Oggi':d===this.addDays(this.TODAY,-1)?'Ieri':(x=>x[0].toUpperCase()+x.slice(1))(this.dLong(d)),net:net?this.fmtS(net):'',netC:net>0?'var(--inc)':'var(--label2)',
+        rows:L.map((e,i)=>this.rowOf(e,i,()=>e.src==='rec'?this.openInst(e):this.openTx(e)))}});
+    const refDate=ym>=this.CUR?this.TODAY:ym+'-'+this.pad(this.dim(ym));
+    const mn=this.MESI[+ym.slice(5,7)-1].toLowerCase();
+    return {label:sp?this.dLong(sp.d)+(sp.fc?' · previsione':''):lblBase,value:sp?this.fmt(sp.v):cur?this.fmt(cur.v):'—',
+      diff:(diff>=0?'↑ ':'↓ ')+this.fmtS(diff)+(s.range==='m'?' nel mese':' nel periodo'),hasEom:ym===this.CUR&&!!eom,eom:eom?'Fine mese ≈ '+this.fmt0(eom.v):'',
+      hc,xl:this.xl(pts),acc:s.acc,onAcc:e=>this.setState({acc:e.target.value}),
+      onScrub:this.scrubber('hero',pts.length),
+      ranges:[['m','Mese'],['3','3M'],['6','6M'],['12','1A']].map(([k,l])=>({l,bg:s.range===k?'rgba(255,255,255,.24)':'transparent',op:s.range===k?1:.75,onClick:()=>this.setState({range:k})})),
+      tiles:[{c:'var(--incf)',ic:this.IP.down,k:'Entrate',v:this.fmtT(T.inc),vc:'var(--inc)',s:mn},{c:'var(--expf)',ic:this.IP.up,k:'Uscite',v:this.fmtT(T.out),vc:'var(--exp)',s:'fisse '+this.fmt0(T.fix)},{c:'#5856D6',ic:this.IP.piggy,k:'Risparmio',v:this.fmtTS(sav),vc:sav>=0?'var(--inc)':'var(--exp)',s:rate!=null?rate+'% delle entrate':'—'}],
+      toConti:()=>this.setView('conti'),
+      minis:cfg.accounts.map(a=>{const b=this.balanceAt(refDate,a.id);return {name:a.name,bal:b==null?'—':this.fmt(b),grad:this.accGrad(a),ring:s.acc===a.id?'0 0 0 3px var(--bg),0 0 0 5px var(--blue)':'none',
+        onClick:()=>{this.setState({acc:s.acc===a.id?'':a.id});const el=this.scrollRef.current;if(el)el.scrollTo({top:0,behavior:'smooth'})}}}),
+      catF:s.catF,onCat:e=>this.setState({catF:e.target.value}),
+      catOpts:[{v:'',l:'Tutte le categorie'},...[...cfg.cats.out,...cfg.cats.in].map(c=>({v:c.id,l:c.name}))],
+      days,hasRows:days.length>0,empty:!days.length,emptyT:'Nessun movimento '+(s.catF?'in questa categoria':'in '+mn)};
+  }
+
+  anVals(){
+    const s=this.state,cfg=s.cfg,ym=s.ym,Y=ym.slice(0,4);
+    const o={tabs:this.seg([['mese',this.MESI[+ym.slice(5,7)-1]],['anno','Anno '+Y],['prev','Previsione']],s.anTab,k=>this.setState({anTab:k,scrub:null})),
+      isMese:s.anTab==='mese'&&ym>=cfg.startYM,isAnno:s.anTab==='anno',isPrev:s.anTab==='prev',
+      wins:this.seg([[30,'30 giorni'],[90,'90 giorni'],[365,'1 anno']],s.win,k=>this.setState({win:k}))};
+    if(o.isMese){
+      const T=this.monthTotals(ym);const prev=[1,2,3].map(k=>this.ymAdd(ym,-k)).filter(m=>m>=cfg.startYM);
+      const avg={};for(const m of prev){const t=this.monthTotals(m);for(const c in t.byCat)avg[c]=(avg[c]||0)+t.byCat[c]/prev.length}
+      const cats=[...new Set([...Object.keys(T.byCat),...Object.keys(avg)])].map(c=>({c,v:T.byCat[c]||0,a:avg[c]||0,m:this.catMeta(c)})).filter(x=>x.v||x.a).sort((a,b)=>b.v-a.v||b.a-a.a);
+      const top=cats.filter(x=>x.v>0);const segs=top.slice(0,6).map(x=>({v:x.v,c:x.m.color}));const rest=top.slice(6).reduce((t,x)=>t+x.v,0);if(rest)segs.push({v:rest,c:'#8E8E93'});
+      let acc0=0;const gap=segs.length>1?1.2:0;const stops=[];
+      for(const g of segs){const p=g.v/T.out*100;stops.push(`${g.c} ${acc0+gap/2}% ${acc0+p-gap/2}%`,`transparent ${acc0+p-gap/2}% ${acc0+p+gap/2}%`);acc0+=p}
+      o.conic=segs.length?`conic-gradient(${stops.join(',')})`:'var(--fill)';
+      const mx=Math.max(1,...cats.map(x=>Math.max(x.v,x.a)));
+      o.hasOut=T.out>0;o.noOut=!o.hasOut;o.noOutT='Nessuna uscita in '+this.ymLabel(ym);o.outT=this.fmt0(T.out);o.ymS=this.ymShort(ym).toLowerCase();
+      o.cats=cats.map((x,i)=>{const share=T.out?Math.round(x.v/T.out*100):0;const d=x.a?Math.round((x.v-x.a)/x.a*100):null;
+        return {bt:i?'.5px solid var(--sep)':'none',c:x.m.color,ic:x.m.ic,n:x.m.name,v:this.fmt(x.v),d:share+'%'+(d!=null&&isFinite(d)?' · '+(d>0?'+':'')+d+'% vs media':''),dc:d==null?'var(--label3)':d>10?'var(--exp)':d<-10?'var(--inc)':'var(--label3)',w:(x.v/mx*100)+'%',aOp:prev.length&&x.a?.55:0,aL:`calc(${x.a/mx*100}% - 1px)`}});
+      o.hasAvg=prev.length>0;o.avgL='media '+(prev.length===1?'del mese precedente':'degli ultimi '+prev.length+' mesi');
+      const r=this.rates(s.win,null);const fixOut=s.rec.filter(x=>this.recActive(x,ym)&&x.t==='out').reduce((t,x)=>t+x.a,0);
+      o.stats=[{c:'#FF9500',ic:this.IP.cal,k:'Al giorno',v:this.fmt(r.out),s:'spese variabili',vc:'var(--label)'},{c:'#AF52DE',ic:this.IP.cal,k:'A settimana',v:this.fmt(r.out*7),s:'spese variabili',vc:'var(--label)'},{c:'#FF2D55',ic:this.IP.cal,k:'Al mese',v:this.fmt(r.out*30.4),s:'+ fisse '+this.fmt0(fixOut),vc:'var(--label)'},{c:'#5856D6',ic:this.IP.rep,k:'Totale mensile',v:this.fmt(r.out*30.4+fixOut),s:'variabili + fisse',vc:'var(--exp)'}];
+      o.hint=`Media calcolata su ${r.days} giorn${r.days===1?'o':'i'} di movimenti inseriti a mano, escluse spese fisse e giroconti.`+(r.days<21?' Con qualche settimana di dati in più la stima diventa più precisa.':'');
+    }
+    if(o.isAnno){
+      const months=[...Array(12)].map((_,i)=>Y+'-'+this.pad(i+1));const mt=months.map(m=>this.monthTotals(m));
+      const sel=s.barSel==null?months.indexOf(ym):s.barSel;
+      const ti=mt.reduce((t,x)=>t+x.inc,0),to=mt.reduce((t,x)=>t+x.out,0);
+      o.yT='Entrate e uscite '+Y;
+      o.fg=[{k:'Entrate',v:this.fmt0(ti),c:'var(--inc)'},{k:'Uscite',v:this.fmt0(to),c:'var(--exp)'},{k:'Risparmio',v:this.fmtS0(ti-to),c:ti-to>=0?'var(--inc)':'var(--exp)'}];
+      const t=mt[sel];o.rdBig=this.fmtS(t.inc-t.out);o.rdC=t.inc-t.out>=0?'var(--inc)':'var(--exp)';o.rdLbl=this.ymLabel(months[sel])+' · +'+this.fmt0(t.inc)+' · −'+this.fmt0(t.out);
+      const W=this.W2,base=140,top=10;const mx=Math.max(1,...mt.map(x=>Math.max(x.inc,x.out)));const gw=W/12;const bw=8;
+      const bp={bw,zero:'',inc:'',incF:'',out:'',outF:''};
+      const bar=(x,v,key)=>{if(!(v>0)){bp.zero+=`M${x} ${base}V${base}`;return}const y=Math.min(base-.01,base-(base-top)*v/mx+bw/2);bp[key]+=`M${x.toFixed(1)} ${base}V${y.toFixed(1)}`};
+      months.forEach((m,i)=>{const cx=gw*i+gw/2;const fc=m>=this.CUR;bar(cx-bw/2-1.5,mt[i].inc,fc?'incF':'inc');bar(cx+bw/2+1.5,mt[i].out,fc?'outF':'out')});
+      o.bp=bp;
+      o.hits=months.map((m,i)=>({t:this.MB[i][0],fw:i===sel?700:500,c:i===sel?'var(--label)':'var(--label3)',bg:i===sel?'var(--fill2)':'transparent',onClick:()=>this.setState({barSel:i})}));
+      const outIds=cfg.cats.out.map(c=>c.id);const extra=new Set();mt.forEach(x=>Object.keys(x.byCat).forEach(c=>{if(!outIds.includes(c))extra.add(c)}));
+      const rows=[...outIds,...extra].map(c=>({c,m:this.catMeta(c),vals:mt.map(x=>x.byCat[c]||0)})).filter(r=>r.vals.some(v=>v));
+      const hmx=Math.max(1,...rows.flatMap(r=>r.vals));
+      o.hm=months.map((m,i)=>({l:this.MB[i],c:m===ym?'var(--blue)':'var(--label3)'}));
+      o.heat=rows.map(r=>({n:r.m.name,c:r.m.color,ic:r.m.ic,tot:Math.round(r.vals.reduce((a,b)=>a+b,0)),cells:r.vals.map(v=>({t:v?Math.round(v):'·',bg:`color-mix(in srgb,${r.m.color} ${Math.round(v/hmx*55)}%,transparent)`}))}));
+      const valid=i=>months[i]>=cfg.startYM;
+      o.totRows=[{n:'Uscite',c:'var(--exp)',cells:mt.map((x,i)=>valid(i)?Math.round(x.out):'·'),tot:Math.round(to)},{n:'Entrate',c:'var(--inc)',cells:mt.map((x,i)=>valid(i)?Math.round(x.inc):'·'),tot:Math.round(ti)}];
+      o.hasHeat=rows.length>0;o.noHeat=!o.hasHeat;o.noHeatT='Nessuna uscita nel '+Y;
+    }
+    if(o.isPrev){
+      const acc=s.fcAcc||null;const nowB=this.balanceAt(this.TODAY,acc);const r=this.rates(s.win,acc);
+      let from=this.addDays(this.TODAY,-90);const st=cfg.startYM+'-01';if(from<st)from=st;const to=this.addDays(this.TODAY,365);
+      const pts=this.series(from,to,acc);const at=d=>{const p=pts.find(x=>x.d===d);return p?p.v:null};
+      const v0=at(to);const sp=s.scrub&&s.scrub.k==='fc'?pts[s.scrub.i]:null;
+      o.fcAcc=s.fcAcc;o.onFcAcc=e=>this.setState({fcAcc:e.target.value});
+      o.pv=sp?this.fmt(sp.v):v0!=null?this.fmt(v0):'—';o.pl=sp?this.dLong(sp.d)+(sp.fc?' · previsione':''):'Saldo previsto tra 12 mesi';
+      o.fc=this.chart(pts,this.W2,200,false,'fc');o.onScrub=this.scrubber('fc',pts.length);o.xl=this.xl(pts);
+      o.fg=[['Fine mese',at(this.CUR+'-'+this.pad(this.dim(this.CUR)))],['31 dicembre',at(this.TODAY.slice(0,4)+'-12-31')],['Tra 12 mesi',v0]].map(([k,v])=>({k,v:v!=null?this.fmt0(v):'—',s:v!=null&&nowB!=null?this.fmtS0(v-nowB):'',c:v!=null&&nowB!=null&&v-nowB<0?'var(--exp)':'var(--inc)'}));
+      o.calc=[{sep:false,c:'var(--expf)',ic:this.IP.up,t:'Spese variabili',m:'media al mese',a:'−'+this.fmt(r.out*30.4),ac:'var(--exp)'},{sep:true,c:'var(--incf)',ic:this.IP.down,t:'Entrate variabili',m:'media al mese',a:'+'+this.fmt(r.in*30.4),ac:'var(--inc)'},{sep:true,c:'#5856D6',ic:this.IP.rep,t:'Spese ed entrate fisse',m:'nei loro giorni, per tutta la durata',a:'',ac:'var(--label)'}];
+      o.hint=`La previsione parte dal saldo di oggi e aggiunge le voci fisse e il ritmo medio dei movimenti variabili degli ultimi ${s.win===365?'12 mesi':s.win+' giorni'}. Tocca o trascina sul grafico per vedere ogni giorno.`;
+    }
+    return o;
+  }
+
+  contiVals(){
+    const s=this.state,cfg=s.cfg,Y=s.ym.slice(0,4),sy=cfg.startYM.slice(0,4);
+    const startDate=Y===sy?cfg.startYM+'-01':Y+'-01-01';const refDate=s.ym>=this.CUR?this.TODAY:s.ym+'-'+this.pad(this.dim(s.ym));
+    const openOf=acc=>Y===sy?this.opening(acc):this.balanceAt(this.addDays(startDate,-1),acc);
+    const flows=acc=>{let i=0,o=0;for(const e of this.ledger(refDate.slice(0,7))){if(e.d<startDate||e.d>refDate)continue;if(acc&&e.acc!==acc)continue;if(e.t==='in')i+=e.a;else if(e.t==='out')o+=e.a}return {i,o}};
+    const ft=flows(null);const eoy=this.series(Y+'-12-31',Y+'-12-31')[0];
+    return {cap:'Totale di tutti i conti · '+(refDate===this.TODAY?'oggi':this.dShort(refDate)),tot:this.fmt(this.balanceAt(refDate,null)),
+      start:'Inizio '+(Y===sy?this.ymShort(cfg.startYM).toLowerCase():Y)+': '+this.fmt0(openOf(null))+(eoy?' · 31/12 ≈ '+this.fmt0(eoy.v):''),inc:'+'+this.fmt0(ft.i),out:'−'+this.fmt0(ft.o),
+      onTr:()=>this.openTx(null,'tr'),
+      cards:cfg.accounts.map(a=>{const f=flows(a.id);const p=this.series(Y+'-12-31',Y+'-12-31',a.id)[0];
+        return {name:a.name,grad:this.accGrad(a),bal:this.fmt(this.balanceAt(refDate,a.id)),pills:['Inizio '+this.fmt0(openOf(a.id)),'↓ '+this.fmt0(f.i),'↑ '+this.fmt0(f.o),...(p?['31/12 ≈ '+this.fmt0(p.v)]:[])],
+          onAdj:()=>this.setState({sheet:{mode:'adj',acc:a.id,real:''}})}})};
+  }
+
+  fisseVals(){
+    const s=this.state,ym=s.ym;const items=s.rec.slice().sort((a,b)=>b.a-a.a);
+    const act=items.filter(r=>this.recActive(r,ym)),fut=items.filter(r=>r.from>ym),end=items.filter(r=>r.until&&r.until<ym);
+    const tot=t=>act.filter(r=>r.t===t).reduce((x,r)=>x+r.a,0);
+    const card=(r,i)=>{const m=r.t==='tr'?{color:'#8E8E93',ic:this.IP.swap,name:'Giroconto'}:this.catMeta(r.cat);
+      let per='dal '+this.ymShort(r.from).toLowerCase();let prog=null;
+      if(r.until){const n=this.ymDiff(r.from,r.until)+1;const k=Math.min(n,Math.max(0,this.ymDiff(r.from,ym)+1));per+=' al '+this.ymShort(r.until).toLowerCase();if(n>1){per=(k>0?`mese ${k} di ${n}`:n+' mesi')+' · '+per;prog=(k/n*100)+'%'}}else per+=', senza scadenza';
+      return {sep:i>0,c:m.color,ic:m.ic,name:r.name,last:r.until===ym,amt:(r.t==='out'?'−':r.t==='in'?'+':'')+this.fmt(r.a),ac:r.t==='out'?'var(--exp)':r.t==='in'?'var(--inc)':'var(--label)',
+        m1:(r.t==='tr'?this.accName(r.acc)+' → '+this.accName(r.to):m.name+' · '+this.accName(r.acc))+' · giorno '+r.day,m2:per,hasProg:!!prog,prog:prog||'0%',onClick:()=>this.openRec(r)}};
+    const secs=[{t:'Attive',add:true,items:act.map(card),has:act.length>0,none:!act.length}];
+    if(fut.length)secs.push({t:'In partenza',add:false,items:fut.map(card),has:true,none:false});
+    if(end.length)secs.push({t:'Concluse',add:false,items:end.map(card),has:true,none:false});
+    const ms=this.ymShort(ym).toLowerCase();
+    return {tiles:[{c:'var(--expf)',ic:this.IP.up,k:'Uscite fisse',v:this.fmtT(tot('out')),vc:'var(--exp)',s:ms},{c:'var(--incf)',ic:this.IP.down,k:'Entrate fisse',v:this.fmtT(tot('in')),vc:'var(--inc)',s:ms},{c:'#5856D6',ic:this.IP.rep,k:'Voci attive',v:String(act.length),vc:'var(--label)',s:'in questo mese'}],
+      secs,onAdd:()=>this.openRec(null),noneT:'Nessuna spesa fissa in '+this.ymLabel(ym)};
+  }
+
+  impVals(){
+    const s=this.state,c=s.cfg;
+    const upd=fn=>this.setState(st=>{const cfg=JSON.parse(JSON.stringify(st.cfg));fn(cfg);return {cfg}});
+    const arm=(k,fn)=>()=>{if(this.state.armed!==k){this.setState({armed:k});return}this.setState({armed:null});fn()};
+    return {startYM:c.startYM,onStart:e=>{const v=e.target.value;if(/^\d{4}-\d{2}$/.test(v))upd(x=>{x.startYM=v})},
+      accs:c.accounts.map(a=>({name:a.name,grad:this.accGrad(a),op:s.openEdit[a.id]!=null?s.openEdit[a.id]:this.amtIn(c.opening[a.id]||0),
+        onName:e=>{const v=e.target.value;upd(x=>{x.accounts.find(z=>z.id===a.id).name=v})},
+        onOp:e=>{const v=e.target.value;const n=this.parseAmt(v||'0');this.setState(st=>{const cfg={...st.cfg,opening:{...st.cfg.opening}};if(!isNaN(n))cfg.opening[a.id]=n;return {openEdit:{...st.openEdit,[a.id]:v},cfg}})}})),
+      onAddAcc:()=>upd(x=>{x.accounts.push({id:this.uid(),name:'Nuovo conto',c:6+x.accounts.length%3})}),
+      themes:this.seg([['Chiaro','Chiaro'],['Scuro','Scuro']],(s.themeO||this.props.theme||'Chiaro'),k=>this.setState({themeO:k})),
+      onLock:()=>this.setState({preview:'lock'}),onHome:()=>this.setState({preview:'home'}),
+      catGroups:[['out','Categorie di spesa'],['in','Categorie di entrata']].map(([k,t])=>({t,onAdd:()=>upd(x=>{x.cats[k].push({id:(k==='in'?'in-':'')+this.uid(),name:'Nuova categoria'})}),
+        items:c.cats[k].map((z,i)=>{const m=this.catMeta(z.id);const ak='cat:'+z.id;const armed=s.armed===ak;
+          return {sep:i>0,c:m.color,ic:m.ic,n:z.name,onName:e=>{const v=e.target.value;upd(x=>{x.cats[k].find(q=>q.id===z.id).name=v})},
+            delL:armed?'Conferma':'Elimina',delBg:armed?'var(--expf)':'transparent',delC:armed?'#fff':'var(--exp)',onDel:arm(ak,()=>{upd(x=>{x.cats[k]=x.cats[k].filter(q=>q.id!==z.id)});this.toast('Categoria eliminata')})}})})),
+      onExp:()=>this.exportBackup(),onImp:()=>this.importBackup(),
+      resetL:s.armed==='reset'?'Tocca di nuovo per cancellare tutto':'Ricomincia da capo',resetBg:s.armed==='reset'?'var(--expf)':'var(--card)',resetC:s.armed==='reset'?'#fff':'var(--exp)',
+      onReset:arm('reset',()=>{this.setState({cfg:null,tx:[],rec:[],ov:{},view:'mese',ym:this.CUR,setupBal:{},openEdit:{}})})};
+  }
+
+  widgetVals(){
+    const s=this.state;const cfg=s.cfg;
+    const open=()=>this.setState({preview:null});
+    const quick=()=>{this.setState({preview:null,view:'mese',ym:this.CUR});if(this.state.cfg)setTimeout(()=>this.openTx(null),50)};
+    const date=(x=>x[0].toUpperCase()+x.slice(1))(this.dLong(this.TODAY));
+    const icons=[...Array(10)];
+    if(!cfg)return {open,quick,date,icons,total:'—',today:'0,00 €',inc:'—',out:'—',spark:'',notif:'Imposta i tuoi conti per vedere qui saldo e spese.'};
+    const total=this.balanceAt(this.TODAY,null);
+    const today=s.tx.filter(t=>t.d===this.TODAY&&t.t==='out').reduce((a,t)=>a+t.a,0);
+    const T=this.monthTotals(this.CUR);
+    let from=this.addDays(this.TODAY,-29);if(from<cfg.startYM+'-01')from=cfg.startYM+'-01';
+    const pts=this.series(from,this.TODAY,null);let spark='';
+    if(pts.length>1){const vs=pts.map(p=>p.v);let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<1){hi+=1;lo-=1}spark=this.mono(pts.map((p,i)=>[i*140/(pts.length-1),6+(1-(p.v-lo)/(hi-lo))*58]))}
+    let notif='Nessuna spesa fissa nei prossimi 7 giorni.';
+    for(let k=1;k<=7;k++){const d=this.addDays(this.TODAY,k);const e=this.entriesFor(d.slice(0,7)).find(x=>x.src==='rec'&&x.d===d&&!x.skip&&x.t==='out');if(e){notif=(k===1?'Domani':'Il '+this.dShort(d))+': '+e.n+' '+this.fmt(e.a)+' da '+this.accName(e.acc)+'.';break}}
+    return {open,quick,date,icons,total:this.fmt(total),today:this.fmt(today),inc:this.fmt0(T.inc),out:this.fmt0(T.out),spark,notif};
+  }
+
+  openTx(e,forceType){
+    const s=this.state,cfg=s.cfg;const type=e?e.t:(forceType||'out');const a0=cfg.accounts[0]?cfg.accounts[0].id:'';const a1=(cfg.accounts[2]||cfg.accounts[1]||cfg.accounts[0]||{}).id;
+    this.setState({swipe:null,armed:null,sheet:{mode:'tx',id:e?e.id:null,type,amt:e?this.amtIn(e.a).replace('-',''):'',neg:e&&e.a<0,n:e?e.n||'':'',cat:e&&e.cat?e.cat:(type==='in'?cfg.cats.in[0]:cfg.cats.out[0]||{}).id,acc:e?e.acc:a0,to:e&&e.to?e.to:a1,d:e?e.d:(s.ym===this.CUR?this.TODAY:s.ym+'-01')}});
+  }
+  openRec(r){
+    const s=this.state,cfg=s.cfg;
+    this.setState({armed:null,sheet:{mode:'rec',id:r?r.id:null,type:r?r.t:'out',amt:r?this.amtIn(r.a):'',name:r?r.name:'',cat:r&&r.cat?r.cat:cfg.cats.out[0].id,day:r?r.day:1,acc:r?r.acc:cfg.accounts[0].id,to:r&&r.to?r.to:(cfg.accounts[3]||cfg.accounts[0]).id,
+      from:r?r.from:(s.ym<cfg.startYM?cfg.startYM:s.ym),dur:r&&r.until?'n':'none',count:r&&r.until?this.ymDiff(r.from,r.until)+1:12}});
+  }
+  openInst(e){this.setState({swipe:null,sheet:{mode:'inst',rid:e.rid,ym:e.d.slice(0,7),amt:this.amtIn(e.a),skip:e.skip,changed:e.changed}})}
+  patch(p){this.setState(st=>({sheet:{...st.sheet,...p}}))}
+
+  sheetVals(){
+    const s=this.state,f=s.sheet,cfg=s.cfg;
+    const close=()=>this.setState({sheet:null,armed:null});
+    const o={close,stop:e=>e.stopPropagation(),isTx:f.mode==='tx',isRec:f.mode==='rec',isInst:f.mode==='inst',isAdj:f.mode==='adj',isPer:f.mode==='per',hasRight:false};
+    const typeSeg=()=>[['out','Uscita','var(--expf)'],['in','Entrata','var(--incf)'],['tr','Giroconto','var(--blue)']].map(([k,l,c])=>({l,bg:f.type===k?c:'transparent',fg:f.type===k?'#fff':'var(--label)',
+      onClick:()=>this.patch({type:k,cat:k==='tr'?f.cat:(k==='in'?(f.cat&&f.cat.startsWith('in-')?f.cat:cfg.cats.in[0].id):(f.cat&&!f.cat.startsWith('in-')?f.cat:cfg.cats.out[0].id))})}));
+    const amtC=f.type==='out'?'var(--exp)':f.type==='in'?'var(--inc)':'var(--label)';
+    const accOpts=cfg.accounts.map(a=>({v:a.id,l:a.name}));
+    if(f.mode==='tx'){
+      Object.assign(o,{title:f.id?(f.type==='adj'?'Rettifica saldo':'Modifica movimento'):'Nuovo movimento',showSeg:f.type!=='adj',types:typeSeg(),
+        amtT:(f.neg?'−':'')+(f.amt||'0'),amtC,n:f.n,onN:e=>this.patch({n:e.target.value}),showCat:f.type==='in'||f.type==='out',
+        cats:(f.type==='in'?cfg.cats.in:cfg.cats.out).map(c=>{const m=this.catMeta(c.id);const on=f.cat===c.id;return {n:c.name,c:on?'rgba(255,255,255,.25)':m.color,ic:m.ic,bg:on?m.color:'var(--card)',fg:on?'#fff':'var(--label)',onClick:()=>this.patch({cat:c.id})}}),
+        accRows:[{l:f.type==='tr'?'Da':'Conto',k:'acc'},...(f.type==='tr'?[{l:'Verso',k:'to'}]:[])].map(r=>({l:r.l,items:cfg.accounts.map(a=>{const on=f[r.k]===a.id;return {n:a.name,bg:on?'var(--blue)':'var(--card)',fg:on?'#fff':'var(--label)',sh:'none',onClick:()=>this.patch({[r.k]:a.id})}})})),
+        dates:[['Oggi',this.TODAY],['Ieri',this.addDays(this.TODAY,-1)]].map(([l,d])=>({l,bg:f.d===d?'var(--blue)':'var(--card)',fg:f.d===d?'#fff':'var(--label)',onClick:()=>this.patch({d})})),
+        d:f.d,onD:e=>e.target.value&&this.patch({d:e.target.value}),
+        keys:['1','2','3','4','5','6','7','8','9',',','0','⌫'].map(k=>({l:k,onClick:()=>{let a=f.amt||'';
+          if(k==='⌫')a=a.slice(0,-1);else if(k===','){if(!a.includes(','))a=(a||'0')+','}else{const dec=a.split(',')[1];if(dec!=null&&dec.length>=2)return;if(a.replace(',','').length>=8)return;a=a==='0'?k:a+k}
+          this.patch({amt:a})}})),
+        canDel:!!f.id,delL:s.armed==='deltx'?'Conferma eliminazione':'Elimina movimento',delBg:s.armed==='deltx'?'var(--expf)':'var(--card)',delC:s.armed==='deltx'?'#fff':'var(--exp)',
+        onDel:()=>{if(s.armed!=='deltx')return this.setState({armed:'deltx'});this.setState({armed:null});this.delTx({id:f.id})},
+        onSave:()=>{let a=this.parseAmt(f.amt);if(f.neg)a=-a;if(isNaN(a)||(f.type!=='adj'&&a<=0))return this.toast('Scrivi un importo, ad esempio 12,50');
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(f.d))return this.toast('Scegli una data');if(f.d.slice(0,7)<cfg.startYM)return this.toast('La data è prima di '+this.ymLabel(cfg.startYM));
+          if(f.type==='tr'&&f.acc===f.to)return this.toast('Scegli due conti diversi');
+          const tx={id:f.id||this.uid(),d:f.d,t:f.type,a,acc:f.acc,n:f.n.trim()};if(f.type==='tr')tx.to=f.to;else if(f.type!=='adj')tx.cat=f.cat;
+          const ym=f.d.slice(0,7);this.setState(st=>({tx:[...st.tx.filter(x=>x.id!==f.id),tx],sheet:null,ym:!f.id&&ym!==st.ym?ym:st.ym}));this.toast(f.id?'Movimento aggiornato':'Movimento aggiunto')}});
+    }
+    if(f.mode==='rec'){
+      const r=f.id?s.rec.find(x=>x.id===f.id):null;const ak='delrec';
+      const save=()=>{const a=this.parseAmt(f.amt);const name=f.name.trim();const day=Math.min(31,Math.max(1,parseInt(f.day)||1));
+        if(isNaN(a)||a<=0)return this.toast('Scrivi l\'importo mensile');if(!name)return this.toast('Dai un nome alla spesa fissa');if(!/^\d{4}-\d{2}$/.test(f.from))return this.toast('Scegli il primo mese');
+        if(f.type==='tr'&&f.acc===f.to)return this.toast('Scegli due conti diversi');
+        const n=parseInt(f.count);if(f.dur==='n'&&!(n>=1))return this.toast('Scrivi il numero di mesi');
+        const it={id:f.id||this.uid(),name,a,day,t:f.type,acc:f.acc,from:f.from,until:f.dur==='n'?this.ymAdd(f.from,n-1):null};if(f.type==='tr')it.to=f.to;else it.cat=f.cat;
+        this.setState(st=>({rec:[...st.rec.filter(x=>x.id!==it.id),it],sheet:null}));this.toast(f.id?'Spesa fissa aggiornata':'Spesa fissa aggiunta')};
+      const setRec=(fn,msg)=>{this.setState(st=>({rec:fn(st.rec),sheet:null,armed:null}));this.toast(msg)};
+      Object.assign(o,{title:r?r.name:'Nuova spesa fissa',hasRight:true,rightL:'Salva',rightC:'var(--blue)',onRight:save,types:typeSeg(),amt:f.amt,amtC,onAmt:e=>this.patch({amt:e.target.value}),
+        name:f.name,onName:e=>this.patch({name:e.target.value}),showCat:f.type!=='tr',cat:f.cat,onCat:e=>this.patch({cat:e.target.value}),catOpts:(f.type==='in'?cfg.cats.in:cfg.cats.out).map(c=>({v:c.id,l:c.name})),
+        day:f.day,onDay:e=>this.patch({day:e.target.value}),accL:f.type==='tr'?'Dal conto':'Conto',acc:f.acc,onAcc:e=>this.patch({acc:e.target.value}),showTo:f.type==='tr',to:f.to,onTo:e=>this.patch({to:e.target.value}),accOpts,
+        from:f.from,onFrom:e=>this.patch({from:e.target.value}),dur:f.dur,onDur:e=>this.patch({dur:e.target.value}),showCount:f.dur==='n',count:f.count,onCount:e=>this.patch({count:e.target.value}),
+        isEdit:!!r,closeL:this.ymLabel(s.ym).toLowerCase(),canReopen:!!(r&&r.until),
+        onClose:()=>{if(s.ym<r.from)return this.toast('Scegli un mese dopo l\'inizio');setRec(L=>L.map(x=>x.id===r.id?{...x,until:s.ym}:x),'Chiusa dopo '+this.ymLabel(s.ym))},
+        onReopen:()=>setRec(L=>L.map(x=>x.id===r.id?{...x,until:null}:x),'Ora è senza scadenza'),
+        delL:s.armed===ak?'Conferma eliminazione':'Elimina spesa fissa',delBg:s.armed===ak?'var(--expf)':'var(--card)',delC:s.armed===ak?'#fff':'var(--exp)',
+        onDel:()=>{if(s.armed!==ak)return this.setState({armed:ak});setRec(L=>L.filter(x=>x.id!==r.id),'Spesa fissa eliminata')}});
+    }
+    if(f.mode==='inst'){
+      const r=s.rec.find(x=>x.id===f.rid);const mn=this.MESI[+f.ym.slice(5,7)-1].toLowerCase();
+      const setOv=fn=>this.setState(st=>{const ov={...st.ov};const m={...(ov[f.ym]||{})};const x=fn({...(m[f.rid]||{})});if(Object.keys(x).length)m[f.rid]=x;else delete m[f.rid];ov[f.ym]=m;return {ov,sheet:null}});
+      Object.assign(o,{title:r?r.name:'',hasRight:true,rightL:'Salva',rightC:'var(--blue)',
+        note:`Spesa fissa di ${r?this.fmt(r.a):''} al mese, il giorno ${r?r.day:''}. Qui cambi solo ${this.ymLabel(f.ym)}.`,amtL:'Importo di '+mn,amt:f.amt,onAmt:e=>this.patch({amt:e.target.value}),
+        skipL:f.skip?'Ripristina questo mese':'Salta questo mese',changed:f.changed,
+        onSkip:()=>{setOv(x=>{if(x.skip)delete x.skip;else x.skip=true;return x});this.toast(f.skip?'Ripristinata':'Saltata per '+mn)},
+        onReset:()=>{setOv(x=>{delete x.a;return x});this.toast('Importo standard ripristinato')},
+        onEditRec:()=>r&&this.openRec(r),
+        onRight:()=>{const a=this.parseAmt(f.amt);if(isNaN(a)||a<0)return this.toast('Scrivi un importo valido');setOv(x=>{if(a===r.a)delete x.a;else x.a=a;return x});this.toast('Importo di '+mn+' aggiornato')}});
+    }
+    if(f.mode==='adj'){
+      const cur=this.balanceAt(this.TODAY,f.acc);const v=this.parseAmt(f.real);
+      Object.assign(o,{title:'Allinea '+this.accName(f.acc),hasRight:true,rightL:'Allinea',rightC:'var(--blue)',cur:this.fmt(cur),real:f.real,onReal:e=>this.patch({real:e.target.value}),
+        diff:isNaN(v)?'La differenza viene registrata oggi come rettifica: non conta né come spesa né come entrata.':'Differenza: '+this.fmtS(v-cur),
+        onRight:()=>{if(isNaN(v))return this.toast('Scrivi il saldo reale');const d=Math.round((v-cur)*100)/100;if(!d){close();return this.toast('Il saldo è già allineato')}
+          this.setState(st=>({tx:[...st.tx,{id:this.uid(),d:this.TODAY,t:'adj',a:d,acc:f.acc,n:'Rettifica saldo'}],sheet:null}));this.toast('Saldo allineato')}});
+    }
+    if(f.mode==='per'){
+      Object.assign(o,{title:'Vai al mese',y:f.y,onYP:()=>this.patch({y:f.y-1}),onYN:()=>this.patch({y:f.y+1}),
+        months:this.MB.map((l,i)=>{const ym=f.y+'-'+this.pad(i+1);const on=ym===s.ym;return {l,bg:on?'var(--blue)':'var(--card)',fg:on?'#fff':'var(--label)',sh:ym===this.CUR&&!on?'inset 0 0 0 2px var(--blue)':'none',onClick:()=>this.setState({ym,sheet:null,barSel:null})}}),
+        onToday:()=>this.setState({ym:this.CUR,sheet:null,barSel:null})});
+    }
+    return o;
+  }
+}
+
+(function(){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  const draw = () => root.render(React.createElement(Component, { theme: mq.matches ? 'Scuro' : 'Chiaro', screen: 'App', demoData: false }));
+  draw();
+  if (mq.addEventListener) mq.addEventListener('change', draw);
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+})();
+}
+</script>
+</body>
+</html>
